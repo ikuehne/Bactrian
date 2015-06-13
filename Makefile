@@ -28,4 +28,4 @@ yacced_parser:
 
 clean:
 	corebuild -clean
-	rm ./bs ./parser.ml ./parser.mly
+	rm -f ./bs ./parser.ml ./parser.mly
