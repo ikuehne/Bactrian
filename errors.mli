@@ -18,6 +18,8 @@ type t =
    | Literal of string
    | Type    of string * string
 
+(** Exception for type errors. Contains a string representing the expected
+    type and a string representing the received type, in that order. *)
 exception Type_Error of string * string
 
 (** Exception for syntax errors. *)
