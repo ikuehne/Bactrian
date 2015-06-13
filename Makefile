@@ -11,10 +11,21 @@ BUILD = corebuild -ocamlopt $(OCAMLC)
 default: bs
 
 # Simple compilation of interpreter using corebuild.
-bs:
-	ocamlyacc parser/parser.mly
-	mv parser/parser.ml parser.ml
-	mv parser/parser.mli parser.mli
-	$(BUILD) main.native
+bs: main.native
 	mv main.native bs
 
+main.native: parser.ml parser.mli
+	$(BUILD) main.native
+
+parser.ml: yacced_parser
+	mv parser/parser.ml parser.ml
+
+parser.mli: yacced_parser
+	mv parser/parser.mli parser.mli
+
+yacced_parser:
+	ocamlyacc parser/parser.mly
+
+clean:
+	corebuild -clean
+	rm ./bs ./parser.ml ./parser.mly
