@@ -2,9 +2,10 @@
 # Makefile for OCaml Scheme interpreter.
 #
 
-# The OCaml compiler, with as all warnings enabled.
+# The OCaml compiler.
 OCAMLC = opt
 
+# The build command.
 BUILD = corebuild -ocamlopt $(OCAMLC)
 
 # Default compilation.
