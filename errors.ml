@@ -1,10 +1,15 @@
 open Core.Std
 
-type t =
-   | Literal  of string
-   | Type     of string * string
-   | Argument of string * int * int
-       
+(* Make a throwaway module to use the Serialized functor. *)
+module T = struct
+   type t =
+      | Literal  of string
+      | Type     of string * string
+      | Argument of string * int * int with sexp
+
+end
+include T
+include Serial.Serialized(T)
 
 exception Type_Error of string * string
 

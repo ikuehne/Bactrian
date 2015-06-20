@@ -37,8 +37,24 @@ type t =
    (* Exception for invalid number of agruments. Contains the name of the
       function, the number of expected arguments, and the number of arguments
       received. *)
-   | Argument of string * int * int
+   | Argument of string * int * int with sexp
 
+(** Make an s-expression with an Errors.t variant. *)
+val to_sexp : t -> Sexp.t
+
+(** Retrieve the data from an s-expression. Raises a Sexplib.Conv.Of_sexp_error
+    on improper input. *)
+val of_sexp : Sexp.t -> t
+
+(** Show an error as a Sexp-like string. *)
+val to_string : t -> string
+
+(** Retrieve an error from a Sexp-like string. *)
+val of_string : string -> t
+
+(** 'load file' gets a list of 't's from the file named 'file' containing
+    properly formatted s-expressions as strings. *)
+val load : string -> t list
 
 (** Exception for type errors. Contains a string representing the expected
     type and a string representing the received type, in that order. *)
