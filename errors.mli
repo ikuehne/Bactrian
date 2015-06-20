@@ -15,8 +15,17 @@ open Core.Std
 
 (* A type containing all possible errors. *)
 type t =
-   | Literal of string
-   | Type    of string * string
+   (* Error for invalid literals, such as a nonexistent character (for
+      example #\foo). The string simply holds the entered literal. *)
+   | Literal  of string
+   (* Exception for type errors. Contains a string representing the expected
+      type and a string representing the received type, in that order. *)
+   | Type     of string * string
+   (* Exception for invalid number of agruments. Contains the name of the
+      function, the number of expected arguments, and the number of arguments
+      received. *)
+   | Argument of string * int * int
+
 
 (** Exception for type errors. Contains a string representing the expected
     type and a string representing the received type, in that order. *)
@@ -40,3 +49,6 @@ exception Name_Error of string
 
 (** Print an error to stderr.  *)
 val print : t -> unit
+
+(** Convert an error to a string, intended for unit testing. *)
+val to_string : t -> string
