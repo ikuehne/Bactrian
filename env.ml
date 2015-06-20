@@ -51,4 +51,4 @@ let add env key data =
 let add_all env names values = 
    match List.zip names values with
    | Some l -> List.iter ~f:(fun (x, y) -> add env x y) l
-   | None   -> failwith "ohai" 
+   | None   -> assert false

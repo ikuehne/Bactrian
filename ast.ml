@@ -71,7 +71,8 @@ let rec ast_of_sexpr sexpr =
                   | Ok id   -> Define (Ok (id, ast_of_sexpr b))
                   | Error e -> Define (Error e)
                end
-   | lst    -> raise (Invalid_Args ("define", 2, (List.length lst))) in
+   | lst    -> Define (Error (Argument ("define", 2, (List.length lst))))
+   in
 
    (* Create an AST from an s-expression representing an if statement. *)
    let ast_of_if = function
@@ -98,7 +99,8 @@ let rec ast_of_sexpr sexpr =
             end
          | Error e -> Lambda (Error e)
       end
-   | lst -> raise (Invalid_Args ("lambda", 2, (List.length lst))) in
+   | lst -> Lambda (Error (Argument ("lambda", 2, (List.length lst))))
+   in
 
    (* Create an AST from an s-expression representing a function 
     * application. *)

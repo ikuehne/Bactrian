@@ -1,13 +1,26 @@
 (*
- * env.mli
+ * Errors.mli
  *
- *     Exceptions and related values.
+ *     Errors and related values.
  *
  *     Ian Kuehne, 2015.
  *
  *     Error contains a number of useful exceptions for handling bad input.
  *     These are meant to deal with problems originating with the user, and
  *     particularly to allow for helpful error messages.
+ *
+ *     Two styles of error handling are currently supported: the Errors.t type
+ *     and exception throwing. There is some overlap; for example, a
+ *     Type_Error can either be encoded as an exception or as an Errors.t.
+ *
+ *     Errors.t has the advantage that the error information can safely be
+ *     accumulated in a Result type without stopping the interpretation. It is
+ *     used extensively in the "lower" layers of the interpreter, up to Ast and
+ *     below Env and Eval.  Higher up, it would be more complicated to
+ *     accumulate errors and exceptions are still used. In general, the two
+ *     are treated exactly the same way in the end: Main eventually prints an 
+ *     error message and depending on context either quits or discards the last
+ *     expression.
  *
  *)
 
