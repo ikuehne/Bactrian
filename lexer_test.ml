@@ -76,7 +76,11 @@ let test_file f1 f2 =
 let make_test_file_name s = test_folder ^ "/" ^ s ^ test_extension
 let make_result_file_name s = result_folder ^ "/" ^ s ^ result_extension
 
-let tests = ["empty"]
+let tests =
+   let test_list = In_channel.create ~binary:false "lexer_test_list" in
+   let result    = In_channel.input_lines ~fix_win_eol:false test_list in
+   In_channel.close test_list;
+   result
 
 (* Print the stream the lexer produces. Useful for debugging or for generating
  * new tests when the lexer is known to be good. *)
