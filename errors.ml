@@ -36,12 +36,3 @@ let print = function
      Printf.fprintf stderr "%s Expected %d argument%s to %s; got %d.\n"
                            (red "Argument Error: ")
                            e plural f r
- 
-
-let to_string = function
-   | Literal s     ->
-      Printf.sprintf "Literal error(%s)" s
-   | Type (s1, s2) ->
-      Printf.sprintf "Type error(%s, %s)" s1 s2
-   | Argument (s, i1, i2) ->
-      Printf.sprintf "Argument error(%s, %d, %d)" s i1 i2
