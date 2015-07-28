@@ -1,5 +1,5 @@
 (*
- * Errors.mli
+ * errors.mli
  *
  *     Errors and related values.
  *
