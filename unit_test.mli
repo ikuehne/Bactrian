@@ -19,7 +19,7 @@ module Make(M : sig
        the output from the unit to be tested. The representation that is
        output should represent all of the transformations done by the unit to
        be tested. *)
-   val load_test : In_channel.t -> string list
+   val load_test : string -> string list
 
    (** Path to the folder containing the input files. *)
    val test_folder      : string

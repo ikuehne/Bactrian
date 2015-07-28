@@ -1,7 +1,7 @@
 open Core.Std
 
 module Make(M : sig
-   val load_test : In_channel.t -> string list
+   val load_test : string -> string list
    val test_folder      : string
    val test_extension   : string
    val result_folder    : string
@@ -11,13 +11,11 @@ module Make(M : sig
 end) = struct
    open M
    (* Get a list of strings from the correct output. *)
-   let read_result f = In_channel.input_lines ~fix_win_eol:false f
+   let read_result = In_channel.input_lines ~fix_win_eol:false
 
    let test_file f1 f2 =
-      let test   = In_channel.create ~binary:false f1 in
       let result = In_channel.create ~binary:false f2 in
-      let passed = ((load_test test) = (read_result result)) in
-      In_channel.close test;
+      let passed = ((load_test f1) = (read_result result)) in
       In_channel.close result;
       passed
 
@@ -26,18 +24,14 @@ end) = struct
 
    (* Print the stream the unit produces. Useful for debugging or for generating
     * new tests when the lexer is known to be good. *)
-   let print_stream filename = 
-      let in_file   = In_channel.create ~binary:false filename in
-      List.iter ~f:(fun s -> printf "%s\n" s)
-                (load_test in_file);
-      In_channel.close in_file
+   let print_stream filename = List.iter ~f:(fun s -> printf "%s\n" s)
+                                         (load_test filename)
 
    (* Same as print_stream, but takes a test name rather than a full filename. *)
-   let generate_stream filename =
-      print_stream filename
+   let generate_stream filename = print_stream filename
 
    let run_tests () = List.map tests ~f:(fun test ->
-      let message = " lexer_test for " ^ test ^ "\n" in
+      let message = " test for " ^ test ^ "\n" in
       let test_in = make_test_file_name test in
       let correct_out = make_result_file_name test in
       match test_file test_in correct_out with
