@@ -14,6 +14,23 @@
 open Errors
 open Core.Std
 
+let check_matched s =
+   let rec aux = function
+      | [] -> 
+         begin function
+            | 0 -> `Good
+            | _ -> `Incomplete
+         end
+      | '(' :: xs -> fun n -> aux xs (n + 1)
+      | ')' :: xs -> 
+         begin function
+            | n when n < 1 -> `Bad
+            | n -> aux xs (n - 1)
+            end
+      | _ :: xs -> aux xs in
+   aux (String.to_list s) 0
+
+
 (* Lex a string. Used for the REPL; a string is input and a list of tokens
  * is returned. *)
 let lex strng = 
@@ -29,20 +46,18 @@ let lex strng =
  * the parentheses are matched. *)
 let read_input in_channel =
    let rec input_aux previous_lines =
+      (* Keep checking if parentheses are matched; if they are, process the
+       * line. *)
       let new_line = input_line in_channel in
       let line = previous_lines ^ new_line in
-      try
-         let _ = Parser.parse Lexer.lex (Lexing.from_string line) in
-         line
-      (* Catch a parser error after an attempt to parse mismatched
-       * parentheses; just add another line to the stream and try again. *)
-      with (Failure "Mismatched parentheses") ->
-         (* Add some whitespace to make sure the line is lexed correctly. *)
-         let line = previous_lines ^ " " ^ new_line ^ " " in
-         input_aux line in
+      match check_matched line with
+         | `Good       -> line
+         | `Incomplete -> input_aux (previous_lines ^ " " ^ new_line ^ " ")
+         | `Bad        -> 
+            raise (Errors.Syntax_Error "Mismatched parentheses.") in
    input_aux ""
 
-(* Take in an expression from in_channel and return the corresponding AST. *)
+(* Take in an expression from in_channel and return the corresponding s-expression. *)
 let parse_input in_channel =
    let lines  = read_input in_channel in
    let lexbuf = Lexing.from_string lines in
@@ -95,10 +110,6 @@ let repl_loop env =
       loop env in
    Primitives.load env;
    loop env
-(*
-   flush stderr;
-   repl_loop env
-*)
 
 let run_program infile =
    let lexbuf = Lexing.from_channel infile in

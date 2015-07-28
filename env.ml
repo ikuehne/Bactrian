@@ -51,4 +51,6 @@ let add env key data =
 let add_all env names values = 
    match List.zip names values with
    | Some l -> List.iter ~f:(fun (x, y) -> add env x y) l
-   | None   -> assert false
+   | None   -> raise (Errors.Invalid_Args ("[lambda expression]",
+                                           List.length names,
+                                           List.length values))
