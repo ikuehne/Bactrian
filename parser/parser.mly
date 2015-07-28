@@ -43,7 +43,7 @@ sexpr:
   | atom  { Sexpr.Atom $1 }
   | slist { Sexpr.List $1 }
 
-/* Match atoms and package them in the appropriate s-expression. */
+/* Match atoms and package them in an Atom.t. */
 atom:  
   | TOK_UNIT { Atom.Unit    }
   | TOK_BOOL { Atom.Bool $1 }
@@ -56,6 +56,7 @@ atom:
 slist:
   | TOK_LPAREN sexpr_list TOK_RPAREN  { $2 }
   | TOK_LPAREN TOK_RPAREN             { [] }
+  | TOK_LPAREN sexpr_list {failwith "Bad!"}
   | TOK_EOF                           { [] }
 
 /* Parsing rule for series of s-expressions. */

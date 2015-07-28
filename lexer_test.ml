@@ -20,13 +20,16 @@ module T = struct
    (* Name of folder from which to retrieve correct results. *)
    let result_folder = "lexer_results"
    (* Extension for result files. *)
-   let result_extension = ".res"
+   let result_extension = ".lex"
 
    (* Make a short alias for the lexer function. *)
    let lex = Lexer.lex
 
    (* Get a buffer from a filename. *)
-   let buffer_from_file = Lexing.from_channel
+   let buffer_from_file fname = 
+      let test_file = In_channel.create ~binary:false fname in
+      let result = Lexing.from_channel test_file in
+      result
 
    (* Get a list of strings from the lexer and a buffer. *)
    let get_lexer_output buf = 
@@ -52,6 +55,5 @@ module T = struct
 end
 
 module M = Unit_test.Make(T)
-open M
 
-let () = Command.run command
+let () = Command.run M.command
