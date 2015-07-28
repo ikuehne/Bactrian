@@ -1,17 +1,21 @@
 open Errors
 open Core.Std
 
-(* Type of bogoscheme expressions, representing the abstract syntax tree. *)
-type t =
-   | Unit
-   | Bool   of bool
-   | Int    of (int,  Errors.t)  Result.t
-   | Char   of (char, Errors.t) Result.t
-   | ID     of string
-   | Define of (string * t, Errors.t) Result.t
-   | If     of t * t * t
-   | Lambda of (string list * t list, Errors.t) Result.t
-   | Apply  of (t * t list, Errors.t) Result.t
+module T = struct
+    (* Type of bogoscheme expressions, representing the abstract syntax tree. *)
+    type t =
+       | Unit
+       | Bool   of bool
+       | Int    of (int,  Errors.t)  Result.t
+       | Char   of (char, Errors.t) Result.t
+       | ID     of string
+       | Define of (string * t, Errors.t) Result.t
+       | If     of t * t * t
+       | Lambda of (string list * t list, Errors.t) Result.t
+       | Apply  of (t * t list, Errors.t) Result.t with sexp
+end
+include T
+include Serial.Serialized(T)
 
 let get_type = function
    | Unit     -> "Unit"
