@@ -12,10 +12,10 @@
 
 open Core.Std
 
-(** t is the same as Yacc.token. The type is concrete because this module
+(** t is the same as Parser.token. The type is concrete because this module
     exists specifically to deal with that type, so it should easily be
-    convertable with Yacc.tokens. *)
-type t = Yacc.token
+    convertable with Parser.tokens. *)
+type t = Parser.token
 
 (** Alias for to_sexp, to help the sexp syntax extension recursively build
     parsers. *)

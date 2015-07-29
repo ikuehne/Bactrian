@@ -8,7 +8,7 @@
  *)
 
 {
-   open Yacc
+   open Parser
    open Core.Std
 
    let char_of_string s =

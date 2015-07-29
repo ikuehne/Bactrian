@@ -38,7 +38,7 @@ let lex strng =
    let rec loop tokens =
       let token = Lexer.lex lexbuf in
       match token with
-      | Yacc.TOK_EOF -> tokens
+      | Parser.TOK_EOF -> tokens
       | other   -> loop (other :: tokens) in
    List.rev (loop [])
 
@@ -61,7 +61,7 @@ let read_input in_channel =
 let parse_input in_channel =
    let lines  = read_input in_channel in
    let lexbuf = Lexing.from_string lines in
-   Yacc.parse Lexer.lex lexbuf
+   Parser.parse Lexer.lex lexbuf
 
 (* Return a new string that will print red. *)
 let red s = "\027[31;1m" ^ s ^ "\027[0m"
@@ -115,7 +115,7 @@ let run_program infile =
    let lexbuf = Lexing.from_channel infile in
    let env     = Env.make None in
    let rec loop env =
-      let sexpr  = Yacc.parse Lexer.lex lexbuf in
+      let sexpr  = Parser.parse Lexer.lex lexbuf in
          match sexpr with
             | None -> ()
             | Some s ->

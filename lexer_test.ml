@@ -35,7 +35,7 @@ module T = struct
    let get_lexer_output buf = 
       let rec aux accum =
          match lex buf with 
-         | Yacc.TOK_EOF -> "TOK_EOF" :: accum
+         | Parser.TOK_EOF -> "TOK_EOF" :: accum
          | token          -> aux ((Token.to_string token) :: accum)
       in
       List.rev (aux [])

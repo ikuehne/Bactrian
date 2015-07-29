@@ -2,7 +2,7 @@ open Core.Std
 
 (* Make a throwaway module to use the Serialized functor. *)
 module T = struct
-   open Yacc
+   open Parser
    type t = token
 
    let sexp_of_t = function
