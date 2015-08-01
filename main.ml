@@ -126,7 +126,7 @@ let run_program infile =
 
 
 (* Entry point of the interpreter. *)
-let _ = 
+let () = 
    if Array.length Sys.argv <> 2 then
       begin
          print_endline (blue "Welcome to bogoscheme v. 0.0! ");

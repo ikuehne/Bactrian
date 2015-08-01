@@ -37,4 +37,4 @@ parser_test: parser.ml parser.mli
 
 clean:
 	corebuild -clean
-	rm -f ./bs ./parser.ml ./parser.mly ./parser_test ./lexer_test *.native
+	rm -f ./bs ./parser.ml ./parser.mli ./parser.mly ./parser_test ./lexer_test *.native
