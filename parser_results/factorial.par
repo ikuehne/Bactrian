@@ -1,0 +1,3 @@
+(List((Atom(ID define))(Atom(ID number))(Atom(Int(Ok 10)))))
+(List((Atom(ID define))(Atom(ID factorial))(List((Atom(ID lambda))(List((Atom(ID n))))(List((Atom(ID if))(List((Atom(ID =))(Atom(ID n))(Atom(Int(Ok 0)))))(Atom(Int(Ok 1)))(List((Atom(ID *))(Atom(ID n))(List((Atom(ID factorial))(List((Atom(ID -))(Atom(ID n))(Atom(Int(Ok 1)))))))))))))))
+(List((Atom(ID print))(List((Atom(ID factorial))(Atom(ID number))))))
