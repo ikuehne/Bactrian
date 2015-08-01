@@ -54,8 +54,8 @@ let print = function
 let exit = function
    | [value] -> begin match value with
                    | Env.Val_int i -> exit i
-                   | _         -> raise (Type_Error ("Int", 
-                                                     Env.type_of_value value))
+                   | _ -> raise (Type_Error ("Int", 
+                                             Env.type_of_value value))
                 end
    | l -> raise (Invalid_Args ("exit", 1, List.length l))
 

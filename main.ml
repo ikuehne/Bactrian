@@ -88,7 +88,7 @@ let repl_loop env =
    let rec loop env =
       print_string (green "=> ");
       flush stdout;
-      begin try execute_expression env (parse_input stdin)
+      begin try execute_expression env (New_parser.sexpr_from_channel stdin)
       with Failure f ->
               Printf.fprintf stderr "%s %s\n" (red "Error: ") f;
               flush stderr
@@ -112,25 +112,17 @@ let repl_loop env =
    loop env
 
 let run_program infile =
-   let lexbuf = Lexing.from_channel infile in
-   let env     = Env.make None in
-   let rec loop env =
-      let sexpr  = Parser.parse Lexer.lex lexbuf in
-         match sexpr with
-            | None -> ()
-            | Some s ->
-               let expr = Ast.ast_of_sexpr s in
-               let s = Eval.eval expr env in
-               begin match s with 
-                  | Error es -> List.iter es ~f:Errors.print;
-                       flush stderr;
-                       loop env
-                  | _ -> ()
-               end;
-               loop env
-   in
-      Primitives.load env;
-      loop env
+   let env = Env.make None in 
+   Primitives.load env;
+   ignore (
+   List.iter (New_parser.sexpr_list_from_channel infile)
+   ~f:(fun sexpr ->
+   let expr = Ast.ast_of_sexpr sexpr in
+   let s = Eval.eval expr env in
+   match s with 
+      | Error es -> List.iter es ~f:Errors.print;
+                    flush stderr
+      | _ -> ()))
 
 
 (* Entry point of the interpreter. *)
@@ -152,7 +144,7 @@ let _ =
                   | Syntax_Error s -> 
                        Printf.fprintf stderr "%s %s\n" (red "Syntax Error: ") s
                   | Name_Error e ->
-                       Printf.fprintf stderr "%s %s\n" (red "Name Error: ") e
+                       Printf.fprintf stderr "%s %s\n" (red "Name Error: Undefined name: ") e
                   | Invalid_Args (f, e, r) ->
                        let plural = if e = 1 then ""
                                              else "s" in
