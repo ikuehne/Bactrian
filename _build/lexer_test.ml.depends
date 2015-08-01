@@ -1,1 +1,0 @@
-lexer_test.ml: Command Core In_channel Lexer Lexing List Parser Token Unit_test
