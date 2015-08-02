@@ -7,6 +7,7 @@ type value =
    | Val_unit
    | Val_bool    of bool
    | Val_int     of int
+   | Val_float   of float
    | Val_char    of char
    | Val_prim    of (value list -> value)      (* primitive functions *)
    | Val_lambda  of t * string list * Check_ast.t list
@@ -20,6 +21,7 @@ let string_of_value = function
    | Val_bool true  -> "#t"
    | Val_bool false -> "#f"
    | Val_int i      -> string_of_int i
+   | Val_float f    -> Float.to_string f
    | Val_char c     -> String.make 1 c
    | Val_prim _     -> "primitive function"
    | Val_lambda _   -> "lambda expression"

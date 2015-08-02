@@ -20,6 +20,7 @@
 %token          TOK_EOF
 %token <(int, Errors.t)  Core.Std.Result.t> TOK_INT
 %token <(char, Errors.t) Core.Std.Result.t> TOK_CHAR
+%token <float> TOK_FLOAT
 
 %start parse
 %type <Sexpr.t option> parse
@@ -48,6 +49,7 @@ atom:
   | TOK_UNIT { Atom.Unit    }
   | TOK_BOOL { Atom.Bool $1 }
   | TOK_INT  { Atom.Int  $1 }       
+  | TOK_FLOAT { Atom.Float  $1 }       
   | TOK_CHAR { Atom.Char $1 }
   | TOK_ID   { Atom.ID   $1 }
 

@@ -7,6 +7,7 @@ module T = struct
        | Unit
        | Bool   of bool
        | Int    of (int,  Errors.t)  Result.t
+       | Float  of float
        | Char   of (char, Errors.t) Result.t
        | ID     of string
        | Define of (string * t, Errors.t) Result.t
@@ -21,6 +22,7 @@ let get_type = function
    | Unit     -> "Unit"
    | Bool   _ -> "Bool"
    | Int    _ -> "Int"
+   | Float  _ -> "Float"
    | Char   _ -> "Char"
    | ID     _ -> "ID"
    | Define _ -> "Define"
@@ -62,11 +64,12 @@ let rec ast_of_sexpr sexpr =
 
    (* Get the corresponding AST expression from an atomic s-expression. *)
    let ast_of_atom = function
-   | Atom.Unit   -> Unit
-   | Atom.Bool b -> Bool b
-   | Atom.Int  i -> Int  i
-   | Atom.Char c -> Char c
-   | Atom.ID  id -> ID  id in
+   | Atom.Unit    -> Unit
+   | Atom.Bool b  -> Bool b
+   | Atom.Int  i  -> Int  i
+   | Atom.Float f -> Float f
+   | Atom.Char c  -> Char c
+   | Atom.ID  id  -> ID  id in
 
    (* Create an AST from an s-expression representing a definition. *)
    let ast_of_def = function
@@ -152,6 +155,7 @@ and string_of_ast ast =
          | Unit    -> sprintf "%sUNIT"       (spaces indent) 
          | Bool b  -> sprintf "%sBOOL[ %b ]" (spaces indent) b
          | Int  (Ok i)  -> sprintf "%sINT[ %d ]"  (spaces indent) i
+         | Float f -> sprintf "%sFLOAT[ %f ]" (spaces indent) f
          | Char (Ok c)  -> sprintf "%sCHAR[ %c ]" (spaces indent) c
          | ID   id -> sprintf "%sID[ %s ]"   (spaces indent) id
          | Define (Ok (id, e)) -> 

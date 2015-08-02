@@ -26,6 +26,7 @@ let rec eval_checked ast env =
       | Check_ast.Bool b -> Val_bool b
       | Check_ast.Char c -> Val_char c
       | Check_ast.Int i -> Val_int i
+      | Check_ast.Float f -> Val_float f
       | Check_ast.ID id -> handle_lookup id (lookup env id)
       | Check_ast.Define (id, e) -> 
          let definition = eval_checked e env in

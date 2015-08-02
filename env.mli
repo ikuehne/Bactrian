@@ -18,6 +18,7 @@ type value =
    | Val_unit
    | Val_bool    of bool
    | Val_int     of int
+   | Val_float   of float
    | Val_char    of char
    | Val_prim    of (value list -> value)      (* primitive functions *)
    | Val_lambda  of t * string list * Check_ast.t list

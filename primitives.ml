@@ -1,4 +1,5 @@
 open Errors
+open Core.Std
 
 (* 
  * Define the primitive functions. 
@@ -8,6 +9,12 @@ open Errors
 let add = function
    | [Env.Val_int i1; Env.Val_int i2] ->
          Env.Val_int (i1 + i2)
+   | [Env.Val_float f1; Env.Val_int i2] ->
+         Env.Val_float (f1 +. (Float.of_int i2))
+   | [Env.Val_float f1; Env.Val_float f2] ->
+         Env.Val_float (f1 +. f2)
+   | [Env.Val_int i1; Env.Val_float f2] ->
+         Env.Val_float ((Float.of_int i1) +. f2)
    | [Env.Val_int _; v] | [v; _] ->
          raise (Type_Error ("Int", Env.type_of_value v))
    | l ->
@@ -16,17 +23,32 @@ let add = function
 (* Subtract two integers. *)
 let mul = function
    | [Env.Val_int i1; Env.Val_int i2] -> Env.Val_int (i1 * i2)
+   | [Env.Val_int i1; Env.Val_float f2] ->
+         Env.Val_float ((Float.of_int i1) *. f2)
+   | [Env.Val_float f1; Env.Val_float f2] -> Env.Val_float (f1 *. f2)
+   | [Env.Val_float f1; Env.Val_int i2] -> 
+         Env.Val_float (f1 *. (Float.of_int i2))
    | l -> raise (Invalid_Args ("*", 2, List.length l))
 
 (* Subtract two integers. *)
 let sub = function
    | [Env.Val_int i1] -> Env.Val_int (- i1)  (* Unary minus *)
+   | [Env.Val_int i1; Env.Val_float f2] ->
+         Env.Val_float ((Float.of_int i1) -. f2)
+   | [Env.Val_float f1; Env.Val_float f2] -> Env.Val_float (f1 -. f2)
+   | [Env.Val_float f1; Env.Val_int i2] -> 
+         Env.Val_float (f1 -. (Float.of_int i2))
    | [Env.Val_int i1; Env.Val_int i2] -> Env.Val_int (i1 - i2)
    | l -> raise (Invalid_Args ("-", 2, List.length l))
 
 (* Divide two integers. *)
 let div = function
    | [Env.Val_int i1; Env.Val_int i2] -> Env.Val_int (i1 / i2)
+   | [Env.Val_int i1; Env.Val_float f2] ->
+         Env.Val_float ((Float.of_int i1) /. f2)
+   | [Env.Val_float f1; Env.Val_float f2] -> Env.Val_float (f1 /. f2)
+   | [Env.Val_float f1; Env.Val_int i2] -> 
+         Env.Val_float (f1 /. (Float.of_int i2))
    | l -> raise (Invalid_Args ("/", 2, List.length l))
 
 (* Create a boolean operator acting on two integers. *)
@@ -35,13 +57,53 @@ let make_binary_bool_operator op name = function
    | l -> raise (Invalid_Args (name, 2, List.length l))
   
 (* Define binary operators. *)
-let eq = make_binary_bool_operator (=)  "="
-let ne = make_binary_bool_operator (<>) "!="
-let lt = make_binary_bool_operator (<)  "<"
-let gt = make_binary_bool_operator (>)  ">"
-let le = make_binary_bool_operator (<=) "<="
-let ge = make_binary_bool_operator (>=) ">="
+let eq = function
+   | [Env.Val_int   i1; Env.Val_int   i2] -> Env.Val_bool (i1 = i2)
+   | [Env.Val_int   i1; Env.Val_float f2] -> Env.Val_bool ((Float.of_int i1) = f2)
+   | [Env.Val_float f1; Env.Val_float f2] -> Env.Val_bool (f1 = f2)
+   | [Env.Val_float f1; Env.Val_int   i2] -> Env.Val_bool (f1 = (Float.of_int i2))
+   | l -> raise (Invalid_Args ("=", 2, List.length l))
+let ne = function
+   | [Env.Val_int   i1; Env.Val_int   i2] -> Env.Val_bool (i1 <> i2)
+   | [Env.Val_int   i1; Env.Val_float f2] -> Env.Val_bool ((Float.of_int i1) <> f2)
+   | [Env.Val_float f1; Env.Val_float f2] -> Env.Val_bool (f1 <> f2)
+   | [Env.Val_float f1; Env.Val_int   i2] -> Env.Val_bool (f1 <> (Float.of_int i2))
+   | l -> raise (Invalid_Args ("!=", 2, List.length l))
+let lt = function
+   | [Env.Val_int   i1; Env.Val_int   i2] -> Env.Val_bool (i1 < i2)
+   | [Env.Val_int   i1; Env.Val_float f2] -> Env.Val_bool ((Float.of_int i1) < f2)
+   | [Env.Val_float f1; Env.Val_float f2] -> Env.Val_bool (f1 < f2)
+   | [Env.Val_float f1; Env.Val_int   i2] -> Env.Val_bool (f1 < (Float.of_int i2))
+   | l -> raise (Invalid_Args ("<", 2, List.length l))
+let gt = function
+   | [Env.Val_int   i1; Env.Val_int   i2] -> Env.Val_bool (i1 > i2)
+   | [Env.Val_int   i1; Env.Val_float f2] -> Env.Val_bool ((Float.of_int i1) > f2)
+   | [Env.Val_float f1; Env.Val_float f2] -> Env.Val_bool (f1 > f2)
+   | [Env.Val_float f1; Env.Val_int   i2] -> Env.Val_bool (f1 > (Float.of_int i2))
+   | l -> raise (Invalid_Args (">", 2, List.length l))
+let le = function
+   | [Env.Val_int   i1; Env.Val_int   i2] -> Env.Val_bool (i1 <= i2)
+   | [Env.Val_int   i1; Env.Val_float f2] -> Env.Val_bool ((Float.of_int i1) <= f2)
+   | [Env.Val_float f1; Env.Val_float f2] -> Env.Val_bool (f1 <= f2)
+   | [Env.Val_float f1; Env.Val_int   i2] -> Env.Val_bool (f1 <= (Float.of_int i2))
+   | l -> raise (Invalid_Args ("<=", 2, List.length l))
+let ge = function
+   | [Env.Val_int   i1; Env.Val_int   i2] -> Env.Val_bool (i1 >= i2)
+   | [Env.Val_int   i1; Env.Val_float f2] -> Env.Val_bool ((Float.of_int i1) >= f2)
+   | [Env.Val_float f1; Env.Val_float f2] -> Env.Val_bool (f1 >= f2)
+   | [Env.Val_float f1; Env.Val_int   i2] -> Env.Val_bool (f1 >= (Float.of_int i2))
+   | l -> raise (Invalid_Args (">=", 2, List.length l))
 
+(* Type conversions. *)
+let int_to_float = function
+   | [Env.Val_int i] -> Env.Val_float (Float.of_int i)
+   | [v] -> raise (Type_Error ("Int", Env.type_of_value v))
+   | l -> raise (Invalid_Args ("int-to-float", 1, List.length l))
+
+let float_to_int = function
+   | [Env.Val_float f] -> Env.Val_int (Float.to_int f)
+   | [v] -> raise (Type_Error ("Float", Env.type_of_value v))
+   | l -> raise (Invalid_Args ("float-to-int", 1, List.length l))
 
 (* Print a value. *)
 let print = function
@@ -67,5 +129,6 @@ let exit = function
 let load env =
    let ops = [(add, "+"); (sub, "-"); (mul, "*"); (div, "/");
               (eq, "="); (ne, "!="); (lt, "<"); (gt, ">");
-              (le, "<="); (ge, ">="); (print, "print"); (exit, "exit")] in
-      List.iter (fun (op, name) -> Env.add env name (Env.Val_prim op)) ops
+              (le, "<="); (ge, ">="); (print, "print"); (exit, "exit");
+              (float_to_int, "float-to-int"); (int_to_float, "int-to-float")] in
+      List.iter ~f:(fun (op, name) -> Env.add env name (Env.Val_prim op)) ops

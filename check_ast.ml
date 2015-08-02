@@ -6,6 +6,7 @@ type t =
    | Unit
    | Bool   of bool
    | Int    of int
+   | Float  of float
    | Char   of char
    | ID     of string
    | Define of string * t
@@ -34,6 +35,7 @@ let rec check = function
    | Ast.Bool  b        -> Ok (Bool b)
    | Ast.Int  (Ok i)    -> Ok (Int i)
    | Ast.Int  (Error e) -> Error [e]
+   | Ast.Float f        -> Ok (Float f)
    | Ast.Char (Ok c)    -> Ok (Char c)
    | Ast.Char (Error e) -> Error [e]
    | Ast.ID  id -> Ok (ID id)

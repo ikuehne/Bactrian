@@ -15,6 +15,7 @@ type t =
    | Unit
    | Bool   of bool
    | Int    of int
+   | Float  of float
    | Char   of char
    | ID     of string
    | Define of string * t

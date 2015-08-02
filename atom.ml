@@ -6,6 +6,7 @@ module T = struct
       | Unit
       | Bool of bool
       | Int  of (int, Errors.t)  Result.t
+      | Float of float
       | Char of (char, Errors.t) Result.t
       | ID   of string with sexp
 end
