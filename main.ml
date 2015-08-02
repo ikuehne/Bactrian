@@ -14,55 +14,6 @@
 open Errors
 open Core.Std
 
-let check_matched s =
-   let rec aux = function
-      | [] -> 
-         begin function
-            | 0 -> `Good
-            | _ -> `Incomplete
-         end
-      | '(' :: xs -> fun n -> aux xs (n + 1)
-      | ')' :: xs -> 
-         begin function
-            | n when n < 1 -> `Bad
-            | n -> aux xs (n - 1)
-            end
-      | _ :: xs -> aux xs in
-   aux (String.to_list s) 0
-
-
-(* Lex a string. Used for the REPL; a string is input and a list of tokens
- * is returned. *)
-let lex strng = 
-   let lexbuf = Lexing.from_string strng in
-   let rec loop tokens =
-      let token = Lexer.lex lexbuf in
-      match token with
-      | Parser.TOK_EOF -> tokens
-      | other   -> loop (other :: tokens) in
-   List.rev (loop [])
-
-(* Read an expression from input. Input stops when the use presses enter and
- * the parentheses are matched. *)
-let read_input in_channel =
-   let rec input_aux previous_lines =
-      (* Keep checking if parentheses are matched; if they are, process the
-       * line. *)
-      let new_line = input_line in_channel in
-      let line = previous_lines ^ new_line in
-      match check_matched line with
-         | `Good       -> line
-         | `Incomplete -> input_aux (previous_lines ^ " " ^ new_line ^ " ")
-         | `Bad        -> 
-            raise (Errors.Syntax_Error "Mismatched parentheses.") in
-   input_aux ""
-
-(* Take in an expression from in_channel and return the corresponding s-expression. *)
-let parse_input in_channel =
-   let lines  = read_input in_channel in
-   let lexbuf = Lexing.from_string lines in
-   Parser.parse Lexer.lex lexbuf
-
 (* Return a new string that will print red. *)
 let red s = "\027[31;1m" ^ s ^ "\027[0m"
 (* Return a new string that will print blue. *)
@@ -79,16 +30,13 @@ let execute_expression env = function
                       print_endline (Env.string_of_value value)
                    | Error es -> List.iter es ~f:Errors.print;
                      flush stderr
-                     
 
 
-let env = Env.make None
-
-let repl_loop env =
+let repl_loop () =
    let rec loop env =
       print_string (green "=> ");
       flush stdout;
-      begin try execute_expression env (New_parser.sexpr_from_channel stdin)
+      begin try execute_expression env (Parser.sexpr_from_channel stdin)
       with Failure f ->
               Printf.fprintf stderr "%s %s\n" (red "Error: ") f;
               flush stderr
@@ -108,6 +56,7 @@ let repl_loop env =
               flush stderr
       end;
       loop env in
+   let env = Env.make None in
    Primitives.load env;
    loop env
 
@@ -115,7 +64,7 @@ let run_program infile =
    let env = Env.make None in 
    Primitives.load env;
    ignore (
-   List.iter (New_parser.sexpr_list_from_channel infile)
+   Sequence.iter (Parser.stream_from_channel infile)
    ~f:(fun sexpr ->
    let expr = Ast.ast_of_sexpr sexpr in
    let s = Eval.eval expr env in
@@ -130,7 +79,7 @@ let () =
    if Array.length Sys.argv <> 2 then
       begin
          print_endline (blue "Welcome to bogoscheme v. 0.0! ");
-         repl_loop env
+         repl_loop ()
       end
    else
       let infile = In_channel.create Sys.argv.(1) in

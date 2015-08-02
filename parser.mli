@@ -13,9 +13,13 @@
 
 open Core.Std
 
-(** Gets a single t from a file. If the end of one S-expression is on the same
-    line as the start of another, the start of the second one is discarded. *)
+(** Gets a single sexpr from a file. If the end of one S-expression is on the
+    same line as the start of another, the start of the second one is
+    discarded. *)
 val sexpr_from_channel : In_channel.t -> Sexpr.t option
 
-(** Gets a list of t's from a file. Pulls all t's from the file. *)
+(** Gets a list of sexprs from a file. Pulls all sexpr's from the file. *)
 val sexpr_list_from_channel : In_channel.t -> Sexpr.t list
+
+(** Gets a Sequence.t of sexpr's from an In_channel.t *)
+val stream_from_channel : In_channel.t -> Sexpr.t Sequence.t

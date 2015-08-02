@@ -59,7 +59,7 @@ let rec eval_checked ast env =
                   eval_lambda new_env exprs
             | x -> raise (Syntax_Error ("Value "
                                       ^ (string_of_value x)
-                                      ^ "is not a function; "
+                                      ^ " is not a function; "
                                       ^ "cannot apply."))
 
 let eval ast env =

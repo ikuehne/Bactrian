@@ -52,14 +52,14 @@ let sexpr_from_channel c =
                raise (Errors.Syntax_Error ("Mismatched parentheses; no "
                                          ^ "matching '('"))
             | `Incomplete -> aux s
-            | `Good -> Parser.parse Lexer.lex lexbuf
+            | `Good -> Yacc.parse Lexer.lex lexbuf
          end in
    aux ""
 
 let sexpr_list_from_channel c =
    let lexbuf = Lexing.from_channel c in
    let rec loop accum =
-      match Parser.parse Lexer.lex lexbuf with
+      match Yacc.parse Lexer.lex lexbuf with
       | None -> accum
       | Some s -> loop (s :: accum) in
    match check_matched_channel c with
@@ -69,3 +69,17 @@ let sexpr_list_from_channel c =
                                               ^ "matching ')'"))
    | `Good -> In_channel.seek c Int64.zero;
               List.rev (loop [])
+
+let stream_from_channel c =
+   begin
+      match check_matched_channel c with
+      | `Bad -> raise (Errors.Syntax_Error ("Mismatched parentheses; no "
+                                          ^ "matching '('"))
+      | `Incomplete -> raise (Errors.Syntax_Error ("Mismatched parentheses; no "
+                                                 ^ "matching ')'"))
+      | `Good -> In_channel.seek c Int64.zero
+   end;
+   let lexbuf = Lexing.from_channel c in
+   let open Option.Monad_infix in
+   Sequence.unfold ~init:() ~f:(fun () ->
+   (Yacc.parse Lexer.lex lexbuf) >>| (fun x -> (x, ())))

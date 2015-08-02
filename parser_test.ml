@@ -6,7 +6,7 @@ module T = struct
    let result_folder    = "parser_results"
    let result_extension = ".par"
 
-   let parse = Parser.parse Lexer.lex
+   let parse = Yacc.parse Lexer.lex
 
    (* Get a buffer from a filename. *)
    let buffer_from_file fname = 
