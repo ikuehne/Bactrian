@@ -1,3 +1,15 @@
+(* 
+ * parser_test.ml
+ *
+ *     Unit test for the Yacc module.
+ *
+ *     Ian Kuehne, 2015.
+ *
+ *     Implements a regression test as a command-line application using the
+ *     Unit_test functor.
+ *
+ *)
+
 open Core.Std
 
 module T = struct

@@ -27,7 +27,7 @@ yacc.mli: yacced_parser
 yacced_parser:
 	ocamlyacc parser/yacc.mly
 
-lexer_test:
+lexer_test: yacc.ml yacc.mli
 	corebuild lexer_test.native
 	mv lexer_test.native lexer_test
 
@@ -35,6 +35,10 @@ parser_test: yacc.ml yacc.mli
 	corebuild parser_test.native
 	mv parser_test.native parser_test
 
+ast_test:
+	corebuild ast_test.native
+	mv ast_test.native ast_test
+
 clean:
 	corebuild -clean
-	rm -f ./bs ./yacc.ml ./yacc.mli ./parser_test ./lexer_test *.native
+	rm -f ./bs ./yacc.ml ./yacc.mli ./parser_test ./lexer_test ./ast_test *.native

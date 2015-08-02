@@ -1,0 +1,244 @@
+;; Church encoding of lists.
+
+; Print function that adds a newline. Useful for testing
+(define print-endline (lambda (c) (print c) (print #\newline)))
+
+; nil value. Encoded as a function that takes two arguments and returns
+; the first one.
+(define nil (lambda (a b) (a)))
+
+; cons function. Encoded as a function that takes two arguments and
+; returns a function of two arguments that applies its second
+; argument to the first two arguments.
+(define cons (lambda (a b)
+   (lambda (c d)
+      (d a b))))
+
+; car function. Encoded as a function that takes a list and applies
+; it to another function of no arguments that returns unit (which
+; will be called if the list is nil) and, as the second argument to
+; the list, another function that takes two arguments and returns
+; the first one (which will be called if it is a cons).
+(define car (lambda (list)
+   (list (lambda () ())
+         (lambda (a b) a))))
+
+; car function. Encoded as a function that takes a list and applies
+; it to another function of no arguments that returns unit (which
+; will be called if the list is nil) and, as the second argument to
+; the list, another function that takes two arguments and returns
+; the second one (which will be called if it is a cons).
+(define cdr (lambda (list)
+   (list (lambda () ())
+         (lambda (a b) b))))
+
+; Test if a list is nil. Applies a list two true and to a function
+; that takes two arguments and returns false; if it is nil it will
+; call the first argument and return true; if it is a cons the
+; list will evaluate the second argument on its pair and return
+; false.
+(define nil? (lambda (list)
+    (if (list #t (lambda (a b) #f)) #t #f)))
+
+(define cons? (lambda (list)
+    (if (list #t (lambda (a b) #f)) #f #t)))
+
+;; At this point the Church encoding is complete; no more messing
+;; with lambdas is really required. The following are some
+;; useful functions on lists.
+
+; Not list-related, but useful; take a function of two 
+; variables and return a function that takes one variable and
+; returns another function of one variable.
+(define curry (lambda (f)
+                (lambda (a)
+                  (lambda (b) (f a b)))))
+
+; The classic map function on lists.
+(define map (lambda (f list)
+   (if (nil? list)
+       nil
+       (cons (f (car list)) 
+             (map f (cdr list))))))
+
+; Ignore function--take anything and return unit.
+(define ignore (lambda (x) ()))
+
+; Composition functions on one and two variables. Take two functions
+; and return their composition.
+(define $ (lambda (f1 f2) (lambda (x) (f1 (f2 x)))))
+(define $$ (lambda (f1 f2) (lambda (x y) (f1 (f2 x y)))))
+
+; Iter function--map something over a list and return unit.
+(define iter ($$ ignore map))
+
+; Use currying to iterate print over lists.
+(define print-list ((curry iter) print))
+ 		      
+; Test print-list:
+;(print-list (cons 1 (cons 2 (cons 3 (cons 4 (cons 5 nil))))))
+
+; Filter a list by a predicate.
+(define filter (lambda (pred? list)
+                 (if (nil? list)
+                   nil
+                   (if (pred? (car list))
+                     (cons (car list) (filter pred? (cdr list)))
+                     (filter pred? (cdr list))))))
+
+; Test filter:
+;(print-list (filter (lambda (x) (< x 10)) (cons 1 (cons 2 (cons 3 (cons 10 (cons 11 nil)))))))
+
+; Append two lists.
+(define ++ (lambda (list1 list2)
+             (if (nil? list1)
+               list2
+               (cons (car list1) (++ (cdr list1) list2)))))
+
+; Test ++:
+;(print-list (++ (cons 1 (cons 2 (cons 3 nil))) (cons 4 (cons 5 (cons 6 nil)))))
+;(print-list (++ nil (cons 4 (cons 5 (cons 6 nil)))))
+
+(define quicksort (lambda (list)
+                    (if (nil? list) 
+                      nil
+                      ((lambda () 
+                        (define less? (lambda (x) (<  x (car list))))
+                        (define more? (lambda (x) (>= x (car list))))
+                        (define lesses (filter less? (cdr list)))
+                        (define mores  (filter more? (cdr list)))
+                        (++ (quicksort lesses)
+                            (cons (car list)
+                                  (quicksort mores))))))))
+
+; Test quicksort.
+;(print-list (quicksort (cons 30 (cons 100 (cons 12 (cons 33 (cons 348 (cons -12 (cons 1239 (cons 82 (cons 21 (cons 193 (cons 29 nil)))))))))))))
+
+; Performance test.
+; Get a list of some power of two repetitions of this list of somewhat random numbers. Good for testing.
+(define level_one (cons 30 (cons 100 (cons 12 (cons 33 (cons 348 (cons -12 (cons 1239 (cons 82 (cons 21 (cons 193 (cons 29 nil))))))))))))
+(define get_level (lambda (n) 
+                     (if (= n 0)
+                         level_one
+                         ((lambda ()
+                            (define next_level (get_level (- n 1)))
+                            (++ next_level next_level))))))
+; Teset performance on moderately large list. Performance is bad (of course) but not as bad as might be expected on a 5632-element list using
+; a Church encoding.
+;(print-list (quicksort (get_level 9)))
+
+; Boolean not.
+(define not (lambda (b) (if b #f #t)))
+
+; Boolean or.
+(define or (lambda (a b) (if a #t b)))
+
+; Boolean xor.
+(define xor (lambda (a b)
+             (if a (not b) b)))
+
+; Boolean and.
+(define and (lambda (a b) (if a b #f)))
+
+; Equality test on lists.
+(define l= (lambda (list1 list2)
+             (if (xor (nil? list1) 
+                      (nil? list2))
+                 #f
+                 (if (and (nil? list1)
+                          (nil? list2))
+                     #t
+                     (if (= (car list1)
+                            (car list2))
+                         (l= (cdr list1)
+                             (cdr list2))
+                         #f)))))
+
+; Test l=
+;(print (l= (cons 1 (cons 2 (cons 3 nil))) (quicksort (cons 3 (cons 1 (cons 2 nil))))))
+;(print (not (l= (cons 3 (cons 1 (cons 2 (cons 3 nil)))) (quicksort (cons 3 (cons 1 (cons 2 nil)))))))
+;(print (not (l= (cons 1 (cons 3 (cons 2 nil))) (quicksort (cons 3 (cons 1 (cons 2 nil)))))))
+
+; Encoding of simple 2-tuple datatype.
+(define pair (lambda (a b) (lambda (x) (x a b))))
+
+; Retrieve first element of 2-tuple.
+(define fst (lambda (t) (t (lambda (a b) a))))
+
+; Retrieve second element of 2-tuple.
+(define snd (lambda (t) (t (lambda (a b) b))))
+
+; Tests of fst and snd.
+;(print (fst (pair #t #f)))
+;(print (snd (pair #f #t)))
+
+; Print a pair of things.
+(define print-pair (lambda (t) (print (fst t)) (print #\space) (print (snd t)) (print #\newline)))
+
+; Test print-pair.
+(print-pair (pair #t #t))
+
+; Zip two lists into a list of tuples.
+(define zip (lambda (list1 list2) 
+              (if (or (nil? list1) (nil? list2))
+                  nil
+                  (cons (pair (car list1) (car list2))
+                        (zip  (cdr list1) (cdr list2))))))
+
+; Test of zip. Should print 1 2 3 4 5 6.
+;(iter print-pair (zip (cons 1 (cons 3 (cons 5 nil)))
+;                      (cons 2 (cons 4 (cons 6 nil)))))
+
+; Returns the sum of a pair of integers.
+(define add-pair (lambda (t) (+ (fst t) (snd t))))
+
+; Higher-order function to add two lists of integers elementwise by composing functions
+; defined above.
+(define add-lists ($$ ((curry map) add-pair) zip))
+
+; Test of add-lists.
+;(print-list (add-lists (cons 1 (cons 3 (cons 5 nil)))
+;                       (cons 6 (cons 4 (cons 2 nil)))))
+
+(define abs (lambda (x) (if (>= x 0) x (- x))))
+
+(print-endline (= 0 (abs 0)))
+(print-endline (= 0 (abs -0)))
+
+((lambda () (print #\#) (print #\t)))
+(print #\newline)
+
+(print-list (cons #\n (cons #\e (cons #\w (cons #\l (cons #\i (cons #\n (cons #\e (cons #\newline nil)))))))))
+
+; Abbreviated "strings" as linked lists of characters.
+(define a ((curry cons) #\a))
+(define b ((curry cons) #\b))
+(define c ((curry cons) #\c))
+(define d ((curry cons) #\d))
+(define e ((curry cons) #\e))
+(define f ((curry cons) #\f))
+(define g ((curry cons) #\g))
+(define h ((curry cons) #\h))
+(define i ((curry cons) #\i))
+(define j ((curry cons) #\j))
+(define k ((curry cons) #\k))
+(define l ((curry cons) #\l))
+(define m ((curry cons) #\m))
+(define n ((curry cons) #\n))
+(define o ((curry cons) #\o))
+(define p ((curry cons) #\p))
+(define q ((curry cons) #\q))
+(define r ((curry cons) #\r))
+(define s ((curry cons) #\s))
+(define t ((curry cons) #\t))
+(define u ((curry cons) #\u))
+(define v ((curry cons) #\v))
+(define w ((curry cons) #\w))
+(define x ((curry cons) #\x))
+(define y ((curry cons) #\y))
+(define z ((curry cons) #\z))
+(define ! ((curry cons) #\!))
+(define space ((curry cons) #\space))
+(define newline ((curry cons) #\newline))
+
+(print-list (h (e (l (l (o (space (w (o (r (l (d (! (newline nil))))))))))))))
