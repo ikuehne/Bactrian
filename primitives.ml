@@ -125,7 +125,6 @@ let exit = function
 
 (* Load the primitive functions into an environment, 
    along with their names. *)
-
 let load env =
    let ops = [(add, "+"); (sub, "-"); (mul, "*"); (div, "/");
               (eq, "="); (ne, "!="); (lt, "<"); (gt, ">");
