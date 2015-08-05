@@ -23,7 +23,7 @@ let rec string_of_value = function
    | Val_bool false -> "#f"
    | Val_int i      -> string_of_int i
    | Val_float f    -> Float.to_string f
-   | Val_char c     -> String.make 1 c
+   | Val_char c     -> "#\\" ^ String.make 1 c
    | Val_list l     -> List.to_string ~f:string_of_value l
    | Val_prim _     -> "primitive function"
    | Val_lambda _   -> "lambda expression"
