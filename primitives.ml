@@ -99,12 +99,12 @@ let ge = function
 let int_to_float = function
    | [Env.Val_int i] -> Env.Val_float (Float.of_int i)
    | [v] -> raise (Type_Error ("Int", Env.type_of_value v))
-   | l -> raise (Invalid_Args ("int-to-float", 1, List.length l))
+   | l -> raise (Invalid_Args ("int->float", 1, List.length l))
 
 let float_to_int = function
    | [Env.Val_float f] -> Env.Val_int (Float.to_int f)
    | [v] -> raise (Type_Error ("Float", Env.type_of_value v))
-   | l -> raise (Invalid_Args ("float-to-int", 1, List.length l))
+   | l -> raise (Invalid_Args ("float->int", 1, List.length l))
 
 (* Print a value. *)
 let print = function
@@ -135,7 +135,7 @@ let cdr = function
    | [Env.Val_list (x::xs)] -> Env.Val_list xs
    | [Env.Val_list []] -> raise (Syntax_Error "cdr: list has no tail.")
    | [v] -> raise (Type_Error ("List", Env.type_of_value v))
-   | l -> raise (Invalid_Args ("cdr", 2, List.length l))
+   | l -> raise (Invalid_Args ("cdr", 1, List.length l))
 
 let car = function
    | [Env.Val_list (x::xs)] -> x
@@ -145,14 +145,40 @@ let car = function
 
 let nil = Env.Val_list []
 
+(* String handling functions. *)
+let strindex = function
+   | [Env.Val_int i; Env.Val_string s] -> Env.Val_char s.[i]
+   | [Env.Val_int i; v2] -> raise (Type_Error ("String", Env.type_of_value v2))
+   | [v1; _] -> raise (Type_Error ("Int", Env.type_of_value v1))
+   | l -> raise (Invalid_Args ("string-index", 2, List.length l))
+
+let string_to_list = function
+   | [Env.Val_string s] -> String.to_list s
+                        |> List.map ~f:(fun c -> Env.Val_char c)
+                        |> fun l -> Env.Val_list (l)
+   | [v] -> raise (Type_Error ("String", Env.type_of_value v))
+   | l -> raise (Invalid_Args ("string->list", 1, List.length l))
+
+let list_to_string =
+   let rec aux accum = function
+      | (Env.Val_char c) :: xs -> aux (c::accum) xs
+      | [] -> List.rev accum
+      | v :: xs -> raise (Type_Error ("Char", Env.type_of_value v)) in
+   function
+      | [Env.Val_list l] -> Env.Val_string (String.of_char_list (aux [] l))
+      | [v] -> raise (Type_Error ("List", Env.type_of_value v))
+      | l -> raise (Invalid_Args ("list->string", 1, List.length l))
+
 (* Load the primitive functions into an environment, 
    along with their names. *)
 let load env =
    let ops = [(add, "+"); (sub, "-"); (mul, "*"); (div, "/");
               (eq, "="); (ne, "!="); (lt, "<"); (gt, ">");
               (le, "<="); (ge, ">="); (print, "print"); (exit, "exit");
-              (float_to_int, "float-to-int"); (int_to_float, "int-to-float");
-              (make_list, "list"); (cdr, "cdr"); (car, "car"); (cons, "cons")] in
+              (float_to_int, "float->int"); (int_to_float, "int->float");
+              (make_list, "list"); (cdr, "cdr"); (car, "car"); (cons, "cons");
+              (strindex, "string-index"); (string_to_list, "string->list");
+              (list_to_string, "list->string")] in
    let vals = [(nil, "nil")] in
    List.iter ~f:(fun (op, name) -> Env.add env name (Env.Val_prim op)) ops;
    List.iter ~f:(fun (v, name) -> Env.add env name v) vals
