@@ -124,12 +124,24 @@ let exit = function
 
 (* List construction functions. *)
 let cons = function
-   | [v1, Env.Val_list v2] -> Env.Val_list (v1 :: v2)
-   | [_, v2] -> raise (Type_Error ("List", Env.type_of_value v2))
+   | [v1; Env.Val_list v2] -> Env.Val_list (v1 :: v2)
+   | [_; v2] -> raise (Type_Error ("List", Env.type_of_value v2))
    | l -> raise (Invalid_Args ("cons", 2, List.length l))
 
 let make_list = function
    | l -> Env.Val_list l
+
+let cdr = function
+   | [Env.Val_list (x::xs)] -> Env.Val_list xs
+   | [Env.Val_list []] -> raise (Syntax_Error "cdr: list has no tail.")
+   | [v] -> raise (Type_Error ("List", Env.type_of_value v))
+   | l -> raise (Invalid_Args ("cdr", 2, List.length l))
+
+let car = function
+   | [Env.Val_list (x::xs)] -> x
+   | [Env.Val_list []] -> raise (Syntax_Error "car: list has no tail.")
+   | [v] -> raise (Type_Error ("List", Env.type_of_value v))
+   | l -> raise (Invalid_Args ("cdr", 2, List.length l))
 
 let nil = Env.Val_list []
 
@@ -140,7 +152,7 @@ let load env =
               (eq, "="); (ne, "!="); (lt, "<"); (gt, ">");
               (le, "<="); (ge, ">="); (print, "print"); (exit, "exit");
               (float_to_int, "float-to-int"); (int_to_float, "int-to-float");
-              (make_list, "list")] in
+              (make_list, "list"); (cdr, "cdr"); (car, "car"); (cons, "cons")] in
    let vals = [(nil, "nil")] in
    List.iter ~f:(fun (op, name) -> Env.add env name (Env.Val_prim op)) ops;
    List.iter ~f:(fun (v, name) -> Env.add env name v) vals

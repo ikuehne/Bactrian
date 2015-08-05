@@ -9,7 +9,7 @@ OCAMLC = opt
 BUILD = corebuild -ocamlopt $(OCAMLC)
 
 # Default compilation.
-default: bs
+default: test bs
 
 # Simple compilation of interpreter using corebuild.
 bs: main.native

@@ -54,6 +54,10 @@ let repl_loop () =
                                     (red "Argument Error: ")
                                     e plural f r;
               flush stderr
+         | Type_Error (e, r) ->
+              Printf.fprintf stderr "%s Expected %s, got %s.\n"
+                                  (red "Type error: ") e r;
+              flush stderr
       end;
       loop env in
    let env = Env.make None in
