@@ -62,6 +62,7 @@ let eq = function
    | [Env.Val_int   i1; Env.Val_float f2] -> Env.Val_bool ((Float.of_int i1) = f2)
    | [Env.Val_float f1; Env.Val_float f2] -> Env.Val_bool (f1 = f2)
    | [Env.Val_float f1; Env.Val_int   i2] -> Env.Val_bool (f1 = (Float.of_int i2))
+   | [v1; v2] -> Env.Val_bool (v1 = v2)
    | l -> raise (Invalid_Args ("=", 2, List.length l))
 let ne = function
    | [Env.Val_int   i1; Env.Val_int   i2] -> Env.Val_bool (i1 <> i2)
@@ -121,7 +122,16 @@ let exit = function
                 end
    | l -> raise (Invalid_Args ("exit", 1, List.length l))
 
+(* List construction functions. *)
+let cons = function
+   | [v1, Env.Val_list v2] -> Env.Val_list (v1 :: v2)
+   | [_, v2] -> raise (Type_Error ("List", Env.type_of_value v2))
+   | l -> raise (Invalid_Args ("cons", 2, List.length l))
 
+let make_list = function
+   | l -> Env.Val_list l
+
+let nil = Env.Val_list []
 
 (* Load the primitive functions into an environment, 
    along with their names. *)
@@ -129,5 +139,8 @@ let load env =
    let ops = [(add, "+"); (sub, "-"); (mul, "*"); (div, "/");
               (eq, "="); (ne, "!="); (lt, "<"); (gt, ">");
               (le, "<="); (ge, ">="); (print, "print"); (exit, "exit");
-              (float_to_int, "float-to-int"); (int_to_float, "int-to-float")] in
-      List.iter ~f:(fun (op, name) -> Env.add env name (Env.Val_prim op)) ops
+              (float_to_int, "float-to-int"); (int_to_float, "int-to-float");
+              (make_list, "list")] in
+   let vals = [(nil, "nil")] in
+   List.iter ~f:(fun (op, name) -> Env.add env name (Env.Val_prim op)) ops;
+   List.iter ~f:(fun (v, name) -> Env.add env name v) vals

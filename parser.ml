@@ -3,6 +3,7 @@ open Core.Std
 let count_matched s =
    let rec aux lit escaped n = function
       | [] -> n
+      | '#' :: xs -> aux true false n xs
       | '\\' :: xs -> aux lit true n xs
       | '(' :: xs -> if lit && escaped then aux false false n xs
                                        else aux false false (n + 1) xs

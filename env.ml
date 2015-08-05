@@ -9,6 +9,7 @@ type value =
    | Val_int     of int
    | Val_float   of float
    | Val_char    of char
+   | Val_list    of value list
    | Val_prim    of (value list -> value)      (* primitive functions *)
    | Val_lambda  of t * string list * Check_ast.t list
 
@@ -16,13 +17,14 @@ and t = { parent: t option; bindings: value String.Table.t }
 
 (* Values. *)
 
-let string_of_value = function
+let rec string_of_value = function
    | Val_unit       -> "#u"
    | Val_bool true  -> "#t"
    | Val_bool false -> "#f"
    | Val_int i      -> string_of_int i
    | Val_float f    -> Float.to_string f
    | Val_char c     -> String.make 1 c
+   | Val_list l     -> List.to_string ~f:string_of_value l
    | Val_prim _     -> "primitive function"
    | Val_lambda _   -> "lambda expression"
 
@@ -31,6 +33,7 @@ let type_of_value = function
    | Val_bool _     -> "Bool"
    | Val_int _      -> "Int"
    | Val_char _     -> "Char"
+   | Val_list l     -> "List"
    | Val_prim _ 
    | Val_lambda _   -> "Lambda"
 
