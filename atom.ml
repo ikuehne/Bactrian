@@ -8,6 +8,7 @@ module T = struct
       | Int  of (int, Errors.t)  Result.t
       | Float of float
       | Char of (char, Errors.t) Result.t
+      | String of string
       | ID   of string with sexp
 end
 include T

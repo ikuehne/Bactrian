@@ -9,6 +9,7 @@ module T = struct
        | Int    of (int,  Errors.t)  Result.t
        | Float  of float
        | Char   of (char, Errors.t) Result.t
+       | String of string
        | ID     of string
        | Define of (string * t, Errors.t) Result.t
        | If     of t * t * t
@@ -24,6 +25,7 @@ let get_type = function
    | Int    _ -> "Int"
    | Float  _ -> "Float"
    | Char   _ -> "Char"
+   | String _ -> "String"
    | ID     _ -> "ID"
    | Define _ -> "Define"
    | If     _ -> "If"
@@ -64,12 +66,13 @@ let rec ast_of_sexpr sexpr =
 
    (* Get the corresponding AST expression from an atomic s-expression. *)
    let ast_of_atom = function
-   | Atom.Unit    -> Unit
-   | Atom.Bool b  -> Bool b
-   | Atom.Int  i  -> Int  i
-   | Atom.Float f -> Float f
-   | Atom.Char c  -> Char c
-   | Atom.ID  id  -> ID  id in
+   | Atom.Unit     -> Unit
+   | Atom.Bool b   -> Bool b
+   | Atom.Int  i   -> Int  i
+   | Atom.Float f  -> Float f
+   | Atom.Char c   -> Char c
+   | Atom.String s -> String s
+   | Atom.ID  id   -> ID  id in
 
    (* Create an AST from an s-expression representing a definition. *)
    let ast_of_def = function
@@ -157,6 +160,7 @@ and string_of_ast ast =
          | Int  (Ok i)  -> sprintf "%sINT[ %d ]"  (spaces indent) i
          | Float f -> sprintf "%sFLOAT[ %f ]" (spaces indent) f
          | Char (Ok c)  -> sprintf "%sCHAR[ %c ]" (spaces indent) c
+         | String s -> sprintf "%sSTRING[ %s ]" (spaces indent) s
          | ID   id -> sprintf "%sID[ %s ]"   (spaces indent) id
          | Define (Ok (id, e)) -> 
               sprintf "%sDEFINE[%s\n%s ]" 

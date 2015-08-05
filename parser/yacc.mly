@@ -20,6 +20,7 @@
 %token          TOK_EOF
 %token <(int, Errors.t)  Core.Std.Result.t> TOK_INT
 %token <(char, Errors.t) Core.Std.Result.t> TOK_CHAR
+%token <string> TOK_STRING
 %token <float> TOK_FLOAT
 
 %start parse
@@ -46,12 +47,13 @@ sexpr:
 
 /* Match atoms and package them in an Atom.t. */
 atom:  
-  | TOK_UNIT { Atom.Unit    }
-  | TOK_BOOL { Atom.Bool $1 }
-  | TOK_INT  { Atom.Int  $1 }       
-  | TOK_FLOAT { Atom.Float  $1 }       
-  | TOK_CHAR { Atom.Char $1 }
-  | TOK_ID   { Atom.ID   $1 }
+  | TOK_UNIT   { Atom.Unit      }
+  | TOK_BOOL   { Atom.Bool $1   }
+  | TOK_INT    { Atom.Int  $1   }
+  | TOK_STRING { Atom.String $1 }
+  | TOK_FLOAT  { Atom.Float  $1 }       
+  | TOK_CHAR   { Atom.Char $1   }
+  | TOK_ID     { Atom.ID   $1   }
 
 /* Parsing rule for lists of s-expressions. Match a series of s-expressions
  * in parentheses, or the empty list. */

@@ -31,6 +31,7 @@ let integer    = '-'? ['0' - '9']+
 let id_char    = [^ '(' ')' ';'] # whitespace
 let id         = id_char (id_char | ['0' - '9'])*
 let lit_char   = (_ # (whitespace)) [^ ' ' '\t' '\n' '(' ')']*
+let lit_string = ([^'"'] | '\\' '"')*
 let lit_float  = integer '.' ['0' - '9']* (['e' 'E'] integer)?
 
 (* The lexer definition itself. *)
@@ -45,6 +46,7 @@ rule lex = parse
   | (integer as num)          { TOK_INT (int_of_string_result num)   }
   | (lit_float as num)        { TOK_FLOAT (Float.of_string num)      }
   | "#\\" (lit_char as c)     { TOK_CHAR (char_of_string c)          }
+  | '"'(lit_string as s)'"'   { TOK_STRING s                         }
   | id as identifier          { TOK_ID identifier                    }
   | eof                       { TOK_EOF                              }
   (* lexer error -- this should never happen *)

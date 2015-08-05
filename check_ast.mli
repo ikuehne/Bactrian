@@ -17,6 +17,7 @@ type t =
    | Int    of int
    | Float  of float
    | Char   of char
+   | String of string
    | ID     of string
    | Define of string * t
    | If     of t * t * t

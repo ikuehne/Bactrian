@@ -8,6 +8,7 @@ type t =
    | Int    of int
    | Float  of float
    | Char   of char
+   | String of string
    | ID     of string
    | Define of string * t
    | If     of t * t * t
@@ -36,6 +37,7 @@ let rec check = function
    | Ast.Int  (Ok i)    -> Ok (Int i)
    | Ast.Int  (Error e) -> Error [e]
    | Ast.Float f        -> Ok (Float f)
+   | Ast.String s       -> Ok (String s)
    | Ast.Char (Ok c)    -> Ok (Char c)
    | Ast.Char (Error e) -> Error [e]
    | Ast.ID  id -> Ok (ID id)
