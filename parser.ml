@@ -1,16 +1,18 @@
 open Core.Std
 
 let count_matched s =
-   let rec aux lit escaped n = function
+   let rec aux char_lit str_lit escaped n = function
       | [] -> n
-      | '#' :: xs -> aux true false n xs
-      | '\\' :: xs -> aux lit true n xs
-      | '(' :: xs -> if lit && escaped then aux false false n xs
-                                       else aux false false (n + 1) xs
-      | ')' :: xs -> if lit && escaped then aux false false n xs
-                                       else aux false false (n - 1) xs
-      | c :: xs -> aux (lit && (not (Char.is_whitespace c))) false n xs in
-   aux false false 0 (String.to_list s)
+      | '#' :: xs when not str_lit-> aux true false false n xs
+      | '"' :: xs when str_lit -> aux false escaped false n xs
+      | '"' :: xs -> aux false true false n xs
+      | '\\' :: xs -> aux char_lit str_lit true n xs
+      | '(' :: xs when not str_lit -> if char_lit && escaped then aux false false false n xs
+                                                             else aux false false false (n + 1) xs
+      | ')' :: xs when not str_lit -> if char_lit && escaped then aux false false false n xs
+                                                             else aux false false false (n - 1) xs
+      | c :: xs -> aux (char_lit && (not (Char.is_whitespace c))) str_lit false n xs in
+   aux false false false 0 (String.to_list s)
 
 let check_matched_string s =
    match count_matched s with
