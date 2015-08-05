@@ -39,6 +39,12 @@ ast_test:
 	corebuild ast_test.native
 	mv ast_test.native ast_test
 
+test: lexer_test parser_test ast_test
+	./lexer_test
+	./parser_test
+	./ast_test
+
 clean:
 	corebuild -clean
 	rm -f ./bs ./yacc.ml ./yacc.mli ./parser_test ./lexer_test ./ast_test *.native
+

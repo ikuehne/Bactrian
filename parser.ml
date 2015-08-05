@@ -1,20 +1,21 @@
 open Core.Std
 
+let count_matched s =
+   let rec aux lit escaped n = function
+      | [] -> n
+      | '\\' :: xs -> aux lit true n xs
+      | '(' :: xs -> if lit && escaped then aux false false n xs
+                                       else aux false false (n + 1) xs
+      | ')' :: xs -> if lit && escaped then aux false false n xs
+                                       else aux false false (n - 1) xs
+      | c :: xs -> aux (lit && (not (Char.is_whitespace c))) false n xs in
+   aux false false 0 (String.to_list s)
+
 let check_matched_string s =
-   let rec aux = function
-      | [] -> 
-         begin function
-            | 0 -> `Good
-            | _ -> `Incomplete
-         end
-      | '(' :: xs -> fun n -> aux xs (n + 1)
-      | ')' :: xs -> 
-         begin function
-            | n when n < 1 -> `Bad
-            | n -> aux xs (n - 1)
-            end
-      | _ :: xs -> aux xs in
-   aux (String.to_list s) 0
+   match count_matched s with
+   | x when x < 0 -> `Bad
+   | x when x = 0 -> `Good
+   | _            -> `Incomplete
 
 let check_matched_channel c =
    let rec aux_line = function
@@ -30,9 +31,9 @@ let check_matched_channel c =
       match In_channel.input_line c with
       | None   -> if x = 0 then `Good else `Incomplete
       | Some l -> 
-         begin match aux_line (String.to_list l) x with
-            | None -> `Bad
-            | Some l -> aux l
+         begin match x + (count_matched l) with
+            | y when y < 0 -> `Bad
+            | y            -> aux y
          end in
    aux 0
 

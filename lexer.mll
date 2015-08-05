@@ -28,7 +28,7 @@
 let comment    = ';' [^'\n']*
 let whitespace = [' ' '\t' '\n']
 let integer    = '-'? ['0' - '9']+
-let id_char = [^ '(' ')' ';'] # whitespace
+let id_char    = [^ '(' ')' ';'] # whitespace
 let id         = id_char (id_char | ['0' - '9'])*
 let lit_char   = (_ # (whitespace)) [^ ' ' '\t' '\n' '(' ')']*
 let lit_float  = integer '.' ['0' - '9']* (['e' 'E'] integer)?
