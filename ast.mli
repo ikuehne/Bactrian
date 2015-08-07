@@ -42,6 +42,3 @@ val load : string -> t list
 
 (** Convert an S-expression into an AST expression. *)
 val ast_of_sexpr : Sexpr.t -> t
-
-(** Convert an AST expression into a string. *)
-val string_of_ast : t -> string
