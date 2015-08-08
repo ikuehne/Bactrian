@@ -21,7 +21,7 @@ type t =
    | ID     of string
    | Define of string * t
    | If     of t * t * t
-   | Lambda of string list * t list
+   | Lambda of string list * string option * t list
    | Apply  of t * t list
 
 val check : Ast.t -> (t, Errors.t list) Result.t

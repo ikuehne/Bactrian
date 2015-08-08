@@ -12,7 +12,7 @@ type t =
    | ID     of string
    | Define of string * t
    | If     of t * t * t
-   | Lambda of string list * t list
+   | Lambda of string list * string option * t list
    | Apply  of t * t list
 
 (* Propagate errors when checking a list of checked asts. If a single list of
@@ -55,12 +55,12 @@ let rec check = function
             | (Error _) as x -> x
             | _ -> assert false
          end
-   | Ast.Lambda (Ok (id, asts)) ->
+   | Ast.Lambda (Ok (ids, args, asts)) ->
         let checked = List.map ~f:check asts in
         begin
            match propagate checked with
            | Ok asts ->
-                 Ok (Lambda (id, asts))
+                 Ok (Lambda (ids, args, asts))
            | (Error _) as x -> x
         end
    | Ast.Lambda (Error e) -> Error [e]

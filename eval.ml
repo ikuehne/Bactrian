@@ -41,14 +41,15 @@ let rec eval_checked ast env =
             | x -> raise (Type_Error ("ID",
                                       type_of_value x))
          end
-      | Check_ast.Lambda (ids, exprs) -> Val_lambda (env, ids, exprs)
+      | Check_ast.Lambda (ids, args, exprs) -> 
+         Val_lambda (env, ids, args, exprs)
       | Check_ast.Apply (f, args) ->
          (* Evaluate all the arguments. *)
          let operands = List.map ~f:(fun x -> eval_checked x env) args in
          (* Evaluate the function. *)
          match eval_checked f env with
             | Val_prim prim -> prim operands
-            | (Val_lambda (env, ids, exprs)) as lambda ->
+            | (Val_lambda (env, ids, None, exprs)) as lambda ->
                   let new_env  = make (Some env) in
                   begin
                      try
@@ -58,6 +59,11 @@ let rec eval_checked ast env =
                                              List.length ids,
                                              List.length operands))
                   end;
+                  eval_lambda new_env exprs
+            | (Val_lambda (env, [], Some args, exprs)) as lambda ->
+                  let new_env  = make (Some env) in
+                  let arg_list = Val_list operands in
+                  add new_env args arg_list;
                   eval_lambda new_env exprs
             | x -> raise (Syntax_Error ("Value "
                                       ^ (string_of_value x)

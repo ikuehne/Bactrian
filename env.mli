@@ -23,7 +23,7 @@ type value =
    | Val_string  of string
    | Val_list    of value list
    | Val_prim    of (value list -> value)      (* primitive functions *)
-   | Val_lambda  of t * string list * Check_ast.t list
+   | Val_lambda  of t * string list * string option * Check_ast.t list
 
 (** Type of environments. *)
 and t = { parent: t option; bindings: value String.Table.t }

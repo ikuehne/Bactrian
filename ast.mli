@@ -20,7 +20,10 @@ type t =
    | ID     of string
    | Define of (string * t, Errors.t) Result.t
    | If     of t * t * t
-   | Lambda of ((string list) * t list, Errors.t) Result.t
+   (* A lambda is represented by a tuple containing: a list of argument names,
+    * an optional name for the rest of the arguments (for variadic functions)
+    * and a list of ASTs representing the body of the lambda. *)
+   | Lambda of (string list * string option * t list, Errors.t) Result.t
    | Apply  of (t * t list, Errors.t) Result.t
 
 (** Make an s-expression from an AST. *)

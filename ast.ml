@@ -13,7 +13,7 @@ module T = struct
        | ID     of string
        | Define of (string * t, Errors.t) Result.t
        | If     of t * t * t
-       | Lambda of (string list * t list, Errors.t) Result.t
+       | Lambda of (string list * string option * t list, Errors.t) Result.t
        | Apply  of (t * t list, Errors.t) Result.t with sexp
 end
 include T
@@ -55,6 +55,9 @@ let rec ast_of_if = function
 
 (* Create an AST from an s-expression representing a lambda. *)
 and ast_of_lambda = function
+| (S.Atom (Atom.ID args)) :: (_ :: _ as body) ->
+   let body = List.map ~f:ast_of_sexpr body in
+   Lambda (Ok ([], Some args, body))
 | args :: (_ :: _ as body) ->
    begin
       match check_list args with
@@ -63,7 +66,7 @@ and ast_of_lambda = function
          let body = List.map ~f:ast_of_sexpr body in
          begin
             match List.filter ~f:is_error ids with
-            | []      -> Lambda (Ok (List.map ~f:ok_exn ids, body))
+            | []      -> Lambda (Ok (List.map ~f:ok_exn ids, None, body))
             | e :: _ ->
                begin
                   match e with
@@ -78,12 +81,11 @@ and ast_of_lambda = function
 (* Create an AST from an s-expression representing a function 
  * application. *)
 and ast_of_apply = function
-| f :: args -> 
-   begin
-      match check_f f with
-      | Ok    f -> Apply (Ok (f, (List.map ~f:ast_of_sexpr args)))
-      | Error e -> Apply (Error e)
-   end
+| f :: args -> begin
+                  match check_f f with
+                  | Ok    f -> Apply (Ok (f, (List.map ~f:ast_of_sexpr args)))
+                  | Error e -> Apply (Error e)
+               end
 | []        -> assert false
 
 (* Check that an s-expression is an identifier, returning a Result.t with
