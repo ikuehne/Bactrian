@@ -32,6 +32,33 @@ let execute_expression env = function
                      flush stderr
 
 
+let load_program env infile =
+   Sequence.iter (Parser.stream_from_channel infile)
+      ~f:(fun sexpr ->
+         let expr = Ast.ast_of_sexpr sexpr in
+         let s = Eval.eval expr env in
+         match s with 
+            | Error es -> List.iter es ~f:Errors.print;
+                          flush stderr
+            | _ -> ())
+
+let make_env () =
+   let env = Env.make None in
+   Primitives.load env;
+   load_program env (In_channel.create "./runtime.bs");
+   env
+
+let run_program infile = 
+   let env = make_env () in
+   Sequence.iter (Parser.stream_from_channel infile)
+      ~f:(fun sexpr ->
+         let expr = Ast.ast_of_sexpr sexpr in
+         let s = Eval.eval expr env in
+         match s with 
+            | Error es -> List.iter es ~f:Errors.print;
+                          flush stderr
+            | _ -> ())
+
 let repl_loop () =
    let rec loop env =
       print_string (green "=> ");
@@ -60,36 +87,8 @@ let repl_loop () =
               flush stderr
       end;
       loop env in
-   let env = Env.make None in
-   Primitives.load env;
-   loop env
-
-let load_program env infile =
-   Sequence.iter (Parser.stream_from_channel infile)
-      ~f:(fun sexpr ->
-         let expr = Ast.ast_of_sexpr sexpr in
-         let s = Eval.eval expr env in
-         match s with 
-            | Error es -> List.iter es ~f:Errors.print;
-                          flush stderr
-            | _ -> ())
-
-let make_env () =
-   let env = Env.make None in
-   Primitives.load env;
-   load_program env (In_channel.create "./runtime.bs");
-   env
-
-let run_program infile = 
    let env = make_env () in
-   Sequence.iter (Parser.stream_from_channel infile)
-      ~f:(fun sexpr ->
-         let expr = Ast.ast_of_sexpr sexpr in
-         let s = Eval.eval expr env in
-         match s with 
-            | Error es -> List.iter es ~f:Errors.print;
-                          flush stderr
-            | _ -> ())
+   loop env
 
 (* Entry point of the interpreter. *)
 let () = 
