@@ -77,7 +77,7 @@ let load_program env infile =
 let make_env () =
    let env = Env.make None in
    Primitives.load env;
-   run_program env (In_channel.create "./runtime.bs");
+   load_program env (In_channel.create "./runtime.bs");
    env
 
 let run_program infile = 
