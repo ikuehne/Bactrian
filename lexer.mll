@@ -1,10 +1,26 @@
-(*
- *  lexer.mll
- *  
- *     bogoscheme lexer for CS11 OCaml track.
+(* 
+ * Copyright 2015 Ian Kuehne.
  *
- *     Ian Kuehne, 2015.
+ * Email: ikuehne@caltech.edu
  *
+ * This file is part of Bogoscheme.
+ *
+ * Bogoscheme is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * Bogoscheme is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * Bogoscheme.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *)
+
+(**
+    Bogoscheme lexer for CS11 OCaml track.
  *)
 
 {
@@ -28,8 +44,8 @@
 let comment    = ';' [^'\n']*
 let whitespace = [' ' '\t' '\n']
 let integer    = '-'? ['0' - '9']+
-let id_char    = [^ '(' ')' ';'] # whitespace
-let id         = id_char (id_char | ['0' - '9'])*
+let id_char    = [^ '0' - '9' '(' ')' ';' '''] # whitespace
+let id         = id_char (id_char | ['0' - '9' '''])*
 let lit_char   = (_ # (whitespace)) [^ ' ' '\t' '\n' '(' ')']*
 let lit_string = ([^'"'] | '\\' '"')*
 let lit_float  = integer '.' ['0' - '9']* (['e' 'E'] integer)?
@@ -48,6 +64,7 @@ rule lex = parse
   | "#\\" (lit_char as c)     { TOK_CHAR (char_of_string c)          }
   | '"'(lit_string as s)'"'   { TOK_STRING s                         }
   | id as identifier          { TOK_ID identifier                    }
+  | '''                       { TOK_QUOTE                            }
   | eof                       { TOK_EOF                              }
   (* lexer error -- this should never happen *)
   | _ { raise (Failure ("Unrecognized token: " ^ (Lexing.lexeme lexbuf))) } 

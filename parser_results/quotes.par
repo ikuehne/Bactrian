@@ -1,0 +1,3 @@
+(Quote(List((Atom(Int(Ok 1)))(Atom(Int(Ok 2)))(Atom(Int(Ok 3)))(Atom(Int(Ok 4)))(Atom(Int(Ok 5))))))
+(Quote(List((Atom(ID f))(List((Atom(Int(Ok 1)))(Atom(Int(Ok 2)))(Atom(Int(Ok 3)))(Atom(Int(Ok 4)))(Atom(Int(Ok 5))))))))
+(Quote(List((Atom(ID f))(List((Atom(ID g))(Atom(Int(Ok 1)))(Atom(Int(Ok 2)))))(List((Atom(ID h))(Atom(Int(Ok 1)))(Atom(Int(Ok 3))))))))

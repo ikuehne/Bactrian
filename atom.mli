@@ -1,14 +1,30 @@
 (* 
- * atom.mli
+ * Copyright 2015 Ian Kuehne.
  *
- *     Atoms for s-expressions.
+ * Email: ikuehne@caltech.edu
  *
- *     Ian Kuehne, 2015.
+ * This file is part of Bogoscheme.
  *
- *     Atom contains the type representing possible atoms in s-expressions. 
- *     Used to define s-expressions in Sexpr. Serialization capabilities are
- *     also provided.
+ * Bogoscheme is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
+ * Bogoscheme is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * Bogoscheme.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *)
+
+(**
+    Atoms for s-expressions.
+ 
+    Atom contains the type representing possible atoms in s-expressions. 
+    Used to define s-expressions in Sexpr. Serialization capabilities are
+    also provided.
  *)
 
 open Core.Std
@@ -38,3 +54,6 @@ val of_string : string -> t
 (** 'load file' gets a list of 't's from the file named 'file' containing
     properly formatted s-expressions as strings. *)
 val load : string -> t list
+
+(** Print an atom in a human-readable way reminiscent of the input. *)
+val recreate_input : t -> string

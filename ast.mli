@@ -1,10 +1,26 @@
-(*
- * ast.mli
+(* 
+ * Copyright 2015 Ian Kuehne.
  *
- *     Abstract syntax tree for bogoscheme for the CS11 OCaml track.
+ * Email: ikuehne@caltech.edu
  *
- *     Ian Kuehne, 2015.
+ * This file is part of Bogoscheme.
  *
+ * Bogoscheme is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * Bogoscheme is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * Bogoscheme.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *)
+
+(**
+    Abstract syntax tree for bogoscheme.
  *)
 
 open Core.Std
@@ -25,6 +41,7 @@ type t =
     * and a list of ASTs representing the body of the lambda. *)
    | Lambda of (string list * string option * t list, Errors.t) Result.t
    | Apply  of (t * t list, Errors.t) Result.t
+   | Quote  of Sexpr.t
 
 (** Make an s-expression from an AST. *)
 val to_sexp : t -> Sexp.t

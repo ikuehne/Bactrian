@@ -1,13 +1,29 @@
 (* 
- * ast_test.ml
+ * Copyright 2015 Ian Kuehne.
  *
- *     Unit test for the Ast module.
+ * Email: ikuehne@caltech.edu
  *
- *     Ian Kuehne, 2015.
+ * This file is part of Bogoscheme.
  *
- *     Implements a regression test as a command-line application using the
- *     Unit_test functor.
+ * Bogoscheme is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
+ * Bogoscheme is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * Bogoscheme.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *)
+
+(**
+    Unit test for the Ast module.
+ 
+    Implements a regression test as a command-line application using the
+    Unit_test functor.
  *)
 
 open Core.Std

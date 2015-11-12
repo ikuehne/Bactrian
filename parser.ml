@@ -1,18 +1,61 @@
+(* 
+ * Copyright 2015 Ian Kuehne.
+ *
+ * Email: ikuehne@caltech.edu
+ *
+ * This file is part of Bogoscheme.
+ *
+ * Bogoscheme is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * Bogoscheme is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * Bogoscheme.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *)
+
 open Core.Std
 
-let count_matched s =
-   let rec aux char_lit str_lit escaped n = function
-      | [] -> n
-      | '#' :: xs when not str_lit-> aux true false false n xs
-      | '"' :: xs when str_lit -> aux false escaped false n xs
-      | '"' :: xs -> aux false true false n xs
-      | '\\' :: xs -> aux char_lit str_lit true n xs
-      | '(' :: xs when not str_lit -> if char_lit && escaped then aux false false false n xs
-                                                             else aux false false false (n + 1) xs
-      | ')' :: xs when not str_lit -> if char_lit && escaped then aux false false false n xs
-                                                             else aux false false false (n - 1) xs
-      | c :: xs -> aux (char_lit && (not (Char.is_whitespace c))) str_lit false n xs in
-   aux false false false 0 (String.to_list s)
+(* Simple state machine for counting parentheses in a list of characters,
+ * expressed as a series of mutually-recursive functions. *)
+let rec count_normal n = function
+   | '#' :: xs -> count_char n xs
+   | '"' :: xs -> count_string n xs
+   | '(' :: xs -> count_normal (n + 1) xs
+   | ')' :: xs -> count_normal (n - 1) xs
+   | ';' :: xs -> count_commented n xs
+   | [] -> n
+   | _   :: xs -> count_normal n xs
+and count_char n = function
+   | '\\' :: xs -> count_char_double_escaped n xs
+   | [] -> n
+   | _    :: xs -> count_normal n xs
+and count_char_double_escaped n = function
+   | c :: xs when (Char.is_whitespace c) -> count_normal n xs
+   | [] -> n
+   | _ :: xs -> count_char_escaped n xs
+and count_char_escaped n = function
+   | c :: xs when (Char.is_whitespace c) -> count_normal n xs
+   | '(' :: xs -> count_normal (n + 1) xs
+   | ')' :: xs -> count_normal (n - 1) xs
+   | _ :: xs -> count_char_escaped n xs
+   | [] -> n
+and count_string n = function
+   | '\\' :: xs -> count_string_escaped n xs
+   | '"'  :: xs -> count_normal n xs
+   | [] -> n
+   | _    :: xs -> count_string n xs
+and count_string_escaped n = function
+   | [] -> n
+   | _ :: xs -> count_string n xs
+and count_commented n _ = n
+
+let count_matched s = count_normal 0 (String.to_list s)
 
 let check_matched_string s =
    match count_matched s with
@@ -21,15 +64,6 @@ let check_matched_string s =
    | _            -> `Incomplete
 
 let check_matched_channel c =
-   let rec aux_line = function
-      | [] -> Option.some
-      | '(' :: xs -> fun n -> aux_line xs (n + 1)
-      | ')' :: xs -> 
-         begin function
-            | n when n < 1 -> None
-            | n -> aux_line xs (n - 1)
-         end
-      | _ :: xs -> aux_line xs in
    let rec aux x = 
       match In_channel.input_line c with
       | None   -> if x = 0 then `Good else `Incomplete

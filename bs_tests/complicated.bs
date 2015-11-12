@@ -76,7 +76,7 @@
 (define print-list ((curry iter) print))
  		      
 ; Test print-list:
-;(print-list (cons 1 (cons 2 (cons 3 (cons 4 (cons 5 nil))))))
+(print-list (cons 1 (cons 2 (cons 3 (cons 4 (cons 5 nil))))))
 
 ; Filter a list by a predicate.
 (define filter (lambda (pred? list)
@@ -87,7 +87,7 @@
                      (filter pred? (cdr list))))))
 
 ; Test filter:
-;(print-list (filter (lambda (x) (< x 10)) (cons 1 (cons 2 (cons 3 (cons 10 (cons 11 nil)))))))
+(print-list (filter (lambda (x) (< x 10)) (cons 1 (cons 2 (cons 3 (cons 10 (cons 11 nil)))))))
 
 ; Append two lists.
 (define ++ (lambda (list1 list2)
@@ -95,10 +95,10 @@
                list2
                (cons (car list1) (++ (cdr list1) list2)))))
 
-; Test ++:
-;(print-list (++ (cons 1 (cons 2 (cons 3 nil))) (cons 4 (cons 5 (cons 6 nil)))))
-;(print-list (++ nil (cons 4 (cons 5 (cons 6 nil)))))
-
+;; Test ++:
+(print-list (++ (cons 1 (cons 2 (cons 3 nil))) (cons 4 (cons 5 (cons 6 nil)))))
+(print-list (++ nil (cons 4 (cons 5 (cons 6 nil)))))
+;
 (define quicksort (lambda (list)
                     (if (nil? list) 
                       nil
@@ -111,8 +111,8 @@
                             (cons (car list)
                                   (quicksort mores))))))))
 
-; Test quicksort.
-;(print-list (quicksort (cons 30 (cons 100 (cons 12 (cons 33 (cons 348 (cons -12 (cons 1239 (cons 82 (cons 21 (cons 193 (cons 29 nil)))))))))))))
+;; Test quicksort.
+(print-list (quicksort (cons 30 (cons 100 (cons 12 (cons 33 (cons 348 (cons -12 (cons 1239 (cons 82 (cons 21 (cons 193 (cons 29 nil)))))))))))))
 
 ; Performance test.
 ; Get a list of some power of two repetitions of this list of somewhat random numbers. Good for testing.
@@ -123,10 +123,10 @@
                          ((lambda ()
                             (define next_level (get_level (- n 1)))
                             (++ next_level next_level))))))
-; Teset performance on moderately large list. Performance is bad (of course) but not as bad as might be expected on a 5632-element list using
+; Test performance on moderately large list. Performance is bad (of course) but not as bad as might be expected on a 5632-element list using
 ; a Church encoding.
 ;(print-list (quicksort (get_level 9)))
-
+;
 ; Boolean not.
 (define not (lambda (b) (if b #f #t)))
 

@@ -1,8 +1,31 @@
+(* 
+ * Copyright 2015 Ian Kuehne.
+ *
+ * Email: ikuehne@caltech.edu
+ *
+ * This file is part of Bogoscheme.
+ *
+ * Bogoscheme is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * Bogoscheme is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * Bogoscheme.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *)
+
 open Errors
 open Core.Std
 
+module S = Sexpr
+
 module T = struct
-    (* Type of bogoscheme expressions, representing the abstract syntax tree. *)
+    (* Type of Bogoscheme expressions, representing the abstract syntax tree. *)
     type t =
        | Unit
        | Bool   of bool
@@ -14,12 +37,11 @@ module T = struct
        | Define of (string * t, Errors.t) Result.t
        | If     of t * t * t
        | Lambda of (string list * string option * t list, Errors.t) Result.t
-       | Apply  of (t * t list, Errors.t) Result.t with sexp
+       | Apply  of (t * t list, Errors.t) Result.t
+       | Quote  of S.t with sexp
 end
 include T
 include Serial.Serialized(T)
-
-module S = Sexpr
 
 let get_type = function
    | Unit     -> "Unit"
@@ -33,6 +55,7 @@ let get_type = function
    | If     _ -> "If"
    | Lambda _ -> "Function"
    | Apply  _ -> "Apply"
+   | Quote  _ -> "Quoted Expression"
 
 let ok_exn = function
    | Ok x    -> x
@@ -40,53 +63,53 @@ let ok_exn = function
 
 (* Get the corresponding AST expression from an atomic s-expression. *)
 let ast_of_atom = function
-| Atom.Unit     -> Unit
-| Atom.Bool   b -> Bool   b
-| Atom.Int    i -> Int    i
-| Atom.Float  f -> Float  f
-| Atom.Char   c -> Char   c
-| Atom.String s -> String s
-| Atom.ID    id -> ID    id
+   | Atom.Unit     -> Unit
+   | Atom.Bool   b -> Bool   b
+   | Atom.Int    i -> Int    i
+   | Atom.Float  f -> Float  f
+   | Atom.Char   c -> Char   c
+   | Atom.String s -> String s
+   | Atom.ID    id -> ID    id
 
 (* Create an AST from an s-expression representing an if statement. *)
 let rec ast_of_if = function
-| [a; b; c] -> If ((ast_of_sexpr a), (ast_of_sexpr b), (ast_of_sexpr c))
-| lst       -> raise (Invalid_Args ("if", 3, (List.length lst)))
+   | [a; b; c] -> If ((ast_of_sexpr a), (ast_of_sexpr b), (ast_of_sexpr c))
+   | lst       -> raise (Invalid_Args ("if", 3, (List.length lst)))
 
 (* Create an AST from an s-expression representing a lambda. *)
 and ast_of_lambda = function
-| (S.Atom (Atom.ID args)) :: (_ :: _ as body) ->
-   let body = List.map ~f:ast_of_sexpr body in
-   Lambda (Ok ([], Some args, body))
-| args :: (_ :: _ as body) ->
-   begin
-      match check_list args with
-      | Ok args ->
-         let ids  = List.map ~f:check_id     args in
-         let body = List.map ~f:ast_of_sexpr body in
-         begin
-            match List.filter ~f:is_error ids with
-            | []      -> Lambda (Ok (List.map ~f:ok_exn ids, None, body))
-            | e :: _ ->
-               begin
-                  match e with
-                  | Error error -> Lambda (Error error)
-                  | _           -> assert false
-               end
-         end
-      | Error e -> Lambda (Error e)
-   end
-| lst -> Lambda (Error (Argument ("lambda", 2, (List.length lst))))
+   | (S.Atom (Atom.ID args)) :: (_ :: _ as body) ->
+      let body = List.map ~f:ast_of_sexpr body in
+      Lambda (Ok ([], Some args, body))
+   | args :: (_ :: _ as body) ->
+      begin
+         match check_list args with
+         | Ok args ->
+            let ids  = List.map ~f:check_id     args in
+            let body = List.map ~f:ast_of_sexpr body in
+            begin
+               match List.filter ~f:is_error ids with
+               | []      -> Lambda (Ok (List.map ~f:ok_exn ids, None, body))
+               | e :: _ ->
+                  begin
+                     match e with
+                     | Error error -> Lambda (Error error)
+                     | _           -> assert false
+                  end
+            end
+         | Error e -> Lambda (Error e)
+      end
+   | lst -> Lambda (Error (Argument ("lambda", 2, (List.length lst))))
 
 (* Create an AST from an s-expression representing a function 
  * application. *)
 and ast_of_apply = function
-| f :: args -> begin
-                  match check_f f with
-                  | Ok    f -> Apply (Ok (f, (List.map ~f:ast_of_sexpr args)))
-                  | Error e -> Apply (Error e)
-               end
-| []        -> assert false
+   | f :: args -> begin
+                     match check_f f with
+                     | Ok    f -> Apply (Ok (f, (List.map ~f:ast_of_sexpr args)))
+                     | Error e -> Apply (Error e)
+                  end
+   | []        -> assert false
 
 (* Check that an s-expression is an identifier, returning a Result.t with
  * an Error.Type _ if it is not. *)
@@ -107,19 +130,22 @@ and ast_of_def = function
 (* Check that an s-expression is a list, returning a Result.t with an
  * Error.Type _ if it is not. *)
 and check_list = function
-| S.List lst         -> Ok lst
-| (S.Atom _) as sexp -> Error (Errors.Type ("List", sexp 
-                                                 |> ast_of_sexpr
-                                                 |> get_type))
+   | S.List lst         -> Ok lst
+   | sexp -> Error (Errors.Type ("List", sexp 
+                                      |> ast_of_sexpr
+                                      |> get_type))
 
 (* Create an AST from a list of s-expressions. *)
 and ast_of_list = function
-| [] -> Unit
-| [Sexpr.Atom atom] -> ast_of_atom atom
-| (Sexpr.Atom (Atom.ID "define")) :: def  -> ast_of_def def
-| (Sexpr.Atom (Atom.ID "if")) :: if_then  -> ast_of_if if_then
-| (Sexpr.Atom (Atom.ID "lambda")) :: body -> ast_of_lambda body
-| other -> ast_of_apply other
+   | [] -> Unit
+   | [S.Atom atom] -> ast_of_atom atom
+   | (S.Atom (Atom.ID "define")) :: def  -> ast_of_def def
+   | (S.Atom (Atom.ID "if")) :: if_then  -> ast_of_if if_then
+   | (S.Atom (Atom.ID "lambda")) :: body -> ast_of_lambda body
+   | other -> ast_of_apply other
+
+and ast_of_quote = function
+   | s -> Quote s
 
 (* Check that an s-expression could be a function, returning a Result.t with
  * an Error.Type _ if it is not. *)
@@ -132,5 +158,6 @@ and check_f f =
 
 (* Generate an abstract syntax tree from an s-expression. *)
 and ast_of_sexpr = function
-| S.Atom atom -> ast_of_atom atom
-| S.List lst  -> ast_of_list lst
+   | S.Atom atom -> ast_of_atom atom
+   | S.List lst  -> ast_of_list lst
+   | S.Quote q   -> ast_of_quote q

@@ -6,7 +6,7 @@ open Core.Std
  *)
 
 (* Subtract two integers. *)
-let add = function
+let add _ = function
    | [Env.Val_int i1; Env.Val_int i2] ->
          Env.Val_int (i1 + i2)
    | [Env.Val_float f1; Env.Val_int i2] ->
@@ -21,7 +21,7 @@ let add = function
          raise (Invalid_Args ("+", 2, List.length l))
 
 (* Subtract two integers. *)
-let mul = function
+let mul _ = function
    | [Env.Val_int i1; Env.Val_int i2] -> Env.Val_int (i1 * i2)
    | [Env.Val_int i1; Env.Val_float f2] ->
          Env.Val_float ((Float.of_int i1) *. f2)
@@ -31,7 +31,7 @@ let mul = function
    | l -> raise (Invalid_Args ("*", 2, List.length l))
 
 (* Subtract two integers. *)
-let sub = function
+let sub _ = function
    | [Env.Val_int i1] -> Env.Val_int (- i1)  (* Unary minus *)
    | [Env.Val_int i1; Env.Val_float f2] ->
          Env.Val_float ((Float.of_int i1) -. f2)
@@ -42,7 +42,7 @@ let sub = function
    | l -> raise (Invalid_Args ("-", 2, List.length l))
 
 (* Divide two integers. *)
-let div = function
+let div _ = function
    | [Env.Val_int i1; Env.Val_int i2] -> Env.Val_int (i1 / i2)
    | [Env.Val_int i1; Env.Val_float f2] ->
          Env.Val_float ((Float.of_int i1) /. f2)
@@ -51,44 +51,39 @@ let div = function
          Env.Val_float (f1 /. (Float.of_int i2))
    | l -> raise (Invalid_Args ("/", 2, List.length l))
 
-(* Create a boolean operator acting on two integers. *)
-let make_binary_bool_operator op name = function
-   | [Env.Val_int i1; Env.Val_int i2] -> Env.Val_bool (op i1 i2)
-   | l -> raise (Invalid_Args (name, 2, List.length l))
-  
 (* Define binary operators. *)
-let eq = function
+let eq _ = function
    | [Env.Val_int   i1; Env.Val_int   i2] -> Env.Val_bool (i1 = i2)
    | [Env.Val_int   i1; Env.Val_float f2] -> Env.Val_bool ((Float.of_int i1) = f2)
    | [Env.Val_float f1; Env.Val_float f2] -> Env.Val_bool (f1 = f2)
    | [Env.Val_float f1; Env.Val_int   i2] -> Env.Val_bool (f1 = (Float.of_int i2))
    | [v1; v2] -> Env.Val_bool (v1 = v2)
    | l -> raise (Invalid_Args ("=", 2, List.length l))
-let ne = function
+let ne _ = function
    | [Env.Val_int   i1; Env.Val_int   i2] -> Env.Val_bool (i1 <> i2)
    | [Env.Val_int   i1; Env.Val_float f2] -> Env.Val_bool ((Float.of_int i1) <> f2)
    | [Env.Val_float f1; Env.Val_float f2] -> Env.Val_bool (f1 <> f2)
    | [Env.Val_float f1; Env.Val_int   i2] -> Env.Val_bool (f1 <> (Float.of_int i2))
    | l -> raise (Invalid_Args ("!=", 2, List.length l))
-let lt = function
+let lt _ = function
    | [Env.Val_int   i1; Env.Val_int   i2] -> Env.Val_bool (i1 < i2)
    | [Env.Val_int   i1; Env.Val_float f2] -> Env.Val_bool ((Float.of_int i1) < f2)
    | [Env.Val_float f1; Env.Val_float f2] -> Env.Val_bool (f1 < f2)
    | [Env.Val_float f1; Env.Val_int   i2] -> Env.Val_bool (f1 < (Float.of_int i2))
    | l -> raise (Invalid_Args ("<", 2, List.length l))
-let gt = function
+let gt _ = function
    | [Env.Val_int   i1; Env.Val_int   i2] -> Env.Val_bool (i1 > i2)
    | [Env.Val_int   i1; Env.Val_float f2] -> Env.Val_bool ((Float.of_int i1) > f2)
    | [Env.Val_float f1; Env.Val_float f2] -> Env.Val_bool (f1 > f2)
    | [Env.Val_float f1; Env.Val_int   i2] -> Env.Val_bool (f1 > (Float.of_int i2))
    | l -> raise (Invalid_Args (">", 2, List.length l))
-let le = function
+let le _ = function
    | [Env.Val_int   i1; Env.Val_int   i2] -> Env.Val_bool (i1 <= i2)
    | [Env.Val_int   i1; Env.Val_float f2] -> Env.Val_bool ((Float.of_int i1) <= f2)
    | [Env.Val_float f1; Env.Val_float f2] -> Env.Val_bool (f1 <= f2)
    | [Env.Val_float f1; Env.Val_int   i2] -> Env.Val_bool (f1 <= (Float.of_int i2))
    | l -> raise (Invalid_Args ("<=", 2, List.length l))
-let ge = function
+let ge _ = function
    | [Env.Val_int   i1; Env.Val_int   i2] -> Env.Val_bool (i1 >= i2)
    | [Env.Val_int   i1; Env.Val_float f2] -> Env.Val_bool ((Float.of_int i1) >= f2)
    | [Env.Val_float f1; Env.Val_float f2] -> Env.Val_bool (f1 >= f2)
@@ -96,25 +91,25 @@ let ge = function
    | l -> raise (Invalid_Args (">=", 2, List.length l))
 
 (* Type conversions. *)
-let int_to_float = function
+let int_to_float _ = function
    | [Env.Val_int i] -> Env.Val_float (Float.of_int i)
    | [v] -> raise (Type_Error ("Int", Env.type_of_value v))
    | l -> raise (Invalid_Args ("int->float", 1, List.length l))
 
-let float_to_int = function
+let float_to_int _ = function
    | [Env.Val_float f] -> Env.Val_int (Float.to_int f)
    | [v] -> raise (Type_Error ("Float", Env.type_of_value v))
    | l -> raise (Invalid_Args ("float->int", 1, List.length l))
 
 (* Print a value. *)
-let print = function
+let print _ = function
    | [value] -> 
         Printf.printf "%s" (Env.string_of_value value);
         Env.Val_unit
    | l -> raise (Invalid_Args ("print", 1, List.length l))
 
 (* Exits the repl. *)
-let exit = function
+let exit _ = function
    | [value] -> begin match value with
                    | Env.Val_int i -> exit i
                    | _ -> raise (Type_Error ("Int", 
@@ -123,62 +118,93 @@ let exit = function
    | l -> raise (Invalid_Args ("exit", 1, List.length l))
 
 (* List construction functions. *)
-let cons = function
-   | [v1; Env.Val_list v2] -> Env.Val_list (v1 :: v2)
-   | [_; v2] -> raise (Type_Error ("List", Env.type_of_value v2))
+let cons_of_list = List.fold_right ~init:Env.Val_unit
+                                   ~f:(fun x y -> Env.Val_cons (x, y))
+
+let rec list_of_cons = function
+   | Env.Val_cons (x1, x2) -> x1 :: (list_of_cons x2)
+   | Env.Val_unit          -> []
+   | other                 -> raise (Type_Error ("List",
+                                                 Env.type_of_value other))
+
+let cons _ = function
+   | [v1; v2] -> Env.Val_cons (v1, v2)
    | l -> raise (Invalid_Args ("cons", 2, List.length l))
 
-let make_list = function
-   | l -> Env.Val_list l
-
-let cdr = function
-   | [Env.Val_list (x::xs)] -> Env.Val_list xs
-   | [Env.Val_list []] -> raise (Syntax_Error "cdr: list has no tail.")
+let cdr _ = function
+   | [Env.Val_cons (_, x)] -> x
    | [v] -> raise (Type_Error ("List", Env.type_of_value v))
    | l -> raise (Invalid_Args ("cdr", 1, List.length l))
 
-let car = function
-   | [Env.Val_list (x::xs)] -> x
-   | [Env.Val_list []] -> raise (Syntax_Error "car: list has no tail.")
+let car _ = function
+   | [Env.Val_cons (x, _)] -> x
    | [v] -> raise (Type_Error ("List", Env.type_of_value v))
    | l -> raise (Invalid_Args ("cdr", 2, List.length l))
 
-let nil = Env.Val_list []
+let nil = Env.Val_unit
 
 (* String handling functions. *)
-let strindex = function
+let strindex _ = function
    | [Env.Val_int i; Env.Val_string s] -> Env.Val_char s.[i]
-   | [Env.Val_int i; v2] -> raise (Type_Error ("String", Env.type_of_value v2))
+   | [Env.Val_int _; v2] -> raise (Type_Error ("String", Env.type_of_value v2))
    | [v1; _] -> raise (Type_Error ("Int", Env.type_of_value v1))
    | l -> raise (Invalid_Args ("string-index", 2, List.length l))
 
-let string_to_list = function
+let string_to_list _ = function
    | [Env.Val_string s] -> String.to_list s
                         |> List.map ~f:(fun c -> Env.Val_char c)
-                        |> fun l -> Env.Val_list (l)
+                        |> cons_of_list
    | [v] -> raise (Type_Error ("String", Env.type_of_value v))
    | l -> raise (Invalid_Args ("string->list", 1, List.length l))
 
-let list_to_string =
+let list_to_string _ =
    let rec aux accum = function
       | (Env.Val_char c) :: xs -> aux (c::accum) xs
       | [] -> List.rev accum
-      | v :: xs -> raise (Type_Error ("Char", Env.type_of_value v)) in
-   function
-      | [Env.Val_list l] -> Env.Val_string (String.of_char_list (aux [] l))
-      | [v] -> raise (Type_Error ("List", Env.type_of_value v))
+      | v :: _ -> raise (Type_Error ("Char", Env.type_of_value v)) in
+   function 
+      | [l] -> l
+            |> list_of_cons
+            |> aux []
+            |> String.of_char_list
+            |> fun x -> Env.Val_string x
       | l -> raise (Invalid_Args ("list->string", 1, List.length l))
+
+(* Evaluate a list or quoted expression. *)
+let eval env l =(* function
+   | [Env.Val_quote l] ->
+      let result = l
+                |> Ast.ast_of_sexpr
+                |> fun a -> Eval.eval a env in
+      begin
+         match result with
+         | Ok x -> x
+         | Error (e::es) -> Errors.throw e
+      end
+   | l ->*) raise (Invalid_Args ("eval", 1, List.length l))
 
 (* Load the primitive functions into an environment, 
    along with their names. *)
 let load env =
-   let ops = [(add, "+"); (sub, "-"); (mul, "*"); (div, "/");
-              (eq, "="); (ne, "!="); (lt, "<"); (gt, ">");
-              (le, "<="); (ge, ">="); (print, "print"); (exit, "exit");
-              (float_to_int, "float->int"); (int_to_float, "int->float");
-              (make_list, "list"); (cdr, "cdr"); (car, "car"); (cons, "cons");
-              (strindex, "string-index"); (string_to_list, "string->list");
-              (list_to_string, "list->string")] in
-   let vals = [(nil, "nil")] in
+   let ops = [ (add, "+")
+             ; (sub, "-")
+             ; (mul, "*")
+             ; (div, "/")
+             ; (eq, "=") 
+             ; (ne, "!=")
+             ; (lt, "<")
+             ; (gt, ">")
+             ; (le, "<=")
+             ; (ge, ">=")
+             ; (print, "print")
+             ; (exit, "exit")
+             ; (float_to_int, "float->int")
+             ; (int_to_float, "int->float")
+             ; (string_to_list, "string->list")
+             ; (list_to_string, "list->string")
+             ; (cdr, "cdr")
+             ; (car, "car")
+             ; (cons, "cons")
+             ; (strindex, "string-index")
+             ; (eval, "eval") ] in
    List.iter ~f:(fun (op, name) -> Env.add env name (Env.Val_prim op)) ops;
-   List.iter ~f:(fun (v, name) -> Env.add env name v) vals

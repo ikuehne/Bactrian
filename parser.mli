@@ -1,13 +1,29 @@
-(*
- * new_parser.mli
+(* 
+ * Copyright 2015 Ian Kuehne.
  *
- *     Convenient access to parser functionality.
+ * Email: ikuehne@caltech.edu
  *
- *     Ian Kuehne, 2015.
+ * This file is part of Bogoscheme.
  *
- *     Ocamlyacc provides very little control over the API to the parser, so
- *     this module provides convenient access to parser functionality.
+ * Bogoscheme is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
+ * Bogoscheme is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * Bogoscheme.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *)
+
+(**
+    Convenient access to parser functionality.
+ 
+    Ocamlyacc provides very little control over the API to the parser, so
+    this module provides convenient access to parser functionality.
  *)
 
 

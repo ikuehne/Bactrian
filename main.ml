@@ -64,19 +64,32 @@ let repl_loop () =
    Primitives.load env;
    loop env
 
-let run_program infile =
-   let env = Env.make None in 
-   Primitives.load env;
-   ignore (
+let load_program env infile =
    Sequence.iter (Parser.stream_from_channel infile)
-   ~f:(fun sexpr ->
-   let expr = Ast.ast_of_sexpr sexpr in
-   let s = Eval.eval expr env in
-   match s with 
-      | Error es -> List.iter es ~f:Errors.print;
-                    flush stderr
-      | _ -> ()))
+      ~f:(fun sexpr ->
+         let expr = Ast.ast_of_sexpr sexpr in
+         let s = Eval.eval expr env in
+         match s with 
+            | Error es -> List.iter es ~f:Errors.print;
+                          flush stderr
+            | _ -> ())
 
+let make_env () =
+   let env = Env.make None in
+   Primitives.load env;
+   run_program env (In_channel.create "./runtime.bs");
+   env
+
+let run_program infile = 
+   let env = make_env () in
+   Sequence.iter (Parser.stream_from_channel infile)
+      ~f:(fun sexpr ->
+         let expr = Ast.ast_of_sexpr sexpr in
+         let s = Eval.eval expr env in
+         match s with 
+            | Error es -> List.iter es ~f:Errors.print;
+                          flush stderr
+            | _ -> ())
 
 (* Entry point of the interpreter. *)
 let () = 

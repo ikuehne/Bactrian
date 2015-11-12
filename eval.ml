@@ -1,13 +1,46 @@
-(*
- * eval.ml
+(* 
+ * Copyright 2015 Ian Kuehne.
  *
- *     Evaluator.
+ * Email: ikuehne@caltech.edu
+ *
+ * This file is part of Bogoscheme.
+ *
+ * Bogoscheme is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * Bogoscheme is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * Bogoscheme.  If not, see <http://www.gnu.org/licenses/>.
  *
  *)
 
 open Env
 open Errors
 open Core.Std
+
+let cons_of_list = List.fold_right ~init:Val_unit ~f:(fun x y -> Val_cons (x, y))
+
+let rec quote_to_list =
+   let eval_atom = function
+      | Atom.Unit           -> Val_unit
+      | Atom.Bool b         -> Val_bool b
+      | Atom.Int (Ok i)     -> Val_int i
+      | Atom.Int (Error e)  -> Errors.throw e
+      | Atom.Float f        -> Val_float f
+      | Atom.Char (Ok c)    -> Val_char c
+      | Atom.Char (Error e) -> Errors.throw e
+      | Atom.String s       -> Val_string s
+      | Atom.ID s           -> Val_string s in
+
+   function
+   | Sexpr.Atom a  -> eval_atom a
+   | Sexpr.List l  -> cons_of_list (List.map ~f:quote_to_list l)
+   | Sexpr.Quote q -> quote_to_list q
 
 let rec eval_checked ast env =
 
@@ -46,32 +79,36 @@ let rec eval_checked ast env =
       | Check_ast.Apply (f, args) ->
          (* Evaluate all the arguments. *)
          let operands = List.map ~f:(fun x -> eval_checked x env) args in
-         (* Evaluate the function. *)
-         match eval_checked f env with
-            | Val_prim prim -> prim operands
-            | (Val_lambda (env, ids, None, exprs)) as lambda ->
-                  let new_env  = make (Some env) in
-                  begin
-                     try
-                        add_all new_env ids operands;
-                     with Invalid_argument _ ->
-                        raise (Invalid_Args (string_of_value lambda,
-                                             List.length ids,
-                                             List.length operands))
-                  end;
-                  eval_lambda new_env exprs
-            | (Val_lambda (env, [], Some args, exprs)) as lambda ->
-                  let new_env  = make (Some env) in
-                  let arg_list = Val_list operands in
-                  add new_env args arg_list;
-                  eval_lambda new_env exprs
-            | x -> raise (Syntax_Error ("Value "
-                                      ^ (string_of_value x)
-                                      ^ " is not a function; "
-                                      ^ "cannot apply."))
+         begin
+            (* Evaluate the function. *)
+            match eval_checked f env with
+               | Val_prim prim -> prim env operands
+               | (Val_lambda (env, ids, None, exprs)) as lambda ->
+                     let new_env  = make (Some env) in
+                     begin
+                        try
+                           add_all new_env ids operands;
+                        with Invalid_argument _ ->
+                           raise (Invalid_Args (string_of_value lambda,
+                                                List.length ids,
+                                                List.length operands))
+                     end;
+                     eval_lambda new_env exprs
+               | Val_lambda (env, [], Some args, exprs) ->
+                     let new_env  = make (Some env) in
+                     let arg_list = operands
+                                 |> cons_of_list in
+                     add new_env args arg_list;
+                     eval_lambda new_env exprs
+               | x -> raise (Syntax_Error ("Value "
+                                         ^ (string_of_value x)
+                                         ^ " is not a function; "
+                                         ^ "cannot apply."))
+         end
+      | Check_ast.Quote s -> quote_to_list s
 
 let eval ast env =
    let checked_ast = Check_ast.check ast in
    match checked_ast with
    | Ok ast -> Ok (eval_checked ast env)
-   | (Error _) as x -> x
+   | (Error e) as x -> x

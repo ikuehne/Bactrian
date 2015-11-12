@@ -1,13 +1,29 @@
-(*
- * env.mli
+(* 
+ * Copyright 2015 Ian Kuehne.
  *
- *     Environments and the values that they contain.
+ * Email: ikuehne@caltech.edu
  *
- *     Ian Kuehne, 2015.
+ * This file is part of Bogoscheme.
  *
- *     Env implements an env type which matches identifiers to values.
- *     The mapping is implemented as a hashtable with string keys.
+ * Bogoscheme is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
+ * Bogoscheme is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * Bogoscheme.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *)
+
+(**
+    Environments and the values that they contain.
+ 
+    Env implements an env type which matches identifiers to values.  The mapping
+    is implemented as a hashtable with string keys.
  *)
 
 open Core.Std
@@ -21,8 +37,8 @@ type value =
    | Val_float   of float
    | Val_char    of char
    | Val_string  of string
-   | Val_list    of value list
-   | Val_prim    of (value list -> value)      (* primitive functions *)
+   | Val_cons    of value * value
+   | Val_prim    of (t -> value list -> value)
    | Val_lambda  of t * string list * string option * Check_ast.t list
 
 (** Type of environments. *)

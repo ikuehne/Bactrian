@@ -1,3 +1,4 @@
+#lang racket
 (define do (lambda (a b) a b))
 
 (define loop

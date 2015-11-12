@@ -1,27 +1,43 @@
-(*
- * errors.mli
+(* 
+ * Copyright 2015 Ian Kuehne.
  *
- *     Errors and related values.
+ * Email: ikuehne@caltech.edu
  *
- *     Ian Kuehne, 2015.
+ * This file is part of Bogoscheme.
  *
- *     Error contains a number of useful exceptions for handling bad input.
- *     These are meant to deal with problems originating with the user, and
- *     particularly to allow for helpful error messages.
+ * Bogoscheme is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
  *
- *     Two styles of error handling are currently supported: the Errors.t type
- *     and exception throwing. There is some overlap; for example, a
- *     Type_Error can either be encoded as an exception or as an Errors.t.
+ * Bogoscheme is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
  *
- *     Errors.t has the advantage that the error information can safely be
- *     accumulated in a Result type without stopping the interpretation. It is
- *     used extensively in the "lower" layers of the interpreter, up to Ast and
- *     below Env and Eval.  Higher up, it would be more complicated to
- *     accumulate errors and exceptions are still used. In general, the two
- *     are treated exactly the same way in the end: Main eventually prints an 
- *     error message and depending on context either quits or discards the last
- *     expression.
+ * You should have received a copy of the GNU General Public License along with
+ * Bogoscheme.  If not, see <http://www.gnu.org/licenses/>.
  *
+ *)
+
+(**
+    Errors and related values.
+ 
+    Error contains a number of useful exceptions for handling bad input.
+    These are meant to deal with problems originating with the user, and
+    particularly to allow for helpful error messages.
+ 
+    Two styles of error handling are currently supported: the Errors.t type
+    and exception throwing. There is some overlap; for example, a
+    Type_Error can either be encoded as an exception or as an Errors.t.
+ 
+    Errors.t has the advantage that the error information can safely be
+    accumulated in a Result type without stopping the interpretation. It is
+    used extensively in the "lower" layers of the interpreter, up to Ast and
+    below Env and Eval.  Higher up, it would be more complicated to
+    accumulate errors and exceptions are still used. In general, the two
+    are treated exactly the same way in the end: Main eventually prints an 
+    error message and depending on context either quits or discards the last
+    expression.
  *)
 
 open Core.Std
@@ -75,6 +91,9 @@ exception Invalid_Literal of string
 (** Exception type for referencing an unbound identifier. Contains the unbound
     identifier. *)
 exception Name_Error of string
+
+(** Throw a t as an exception. *)
+val throw : t -> 'a
 
 (** Print an error to stderr.  *)
 val print : t -> unit
