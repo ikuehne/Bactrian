@@ -1,14 +1,22 @@
-(*
- * main.ml
- *
- *     Entry point to the bogoscheme interpreter.
- *
- *     Ian Kuehne, 2015.
- *
- *)
-
 (* 
- * Helper functions for REPL.
+ * Copyright 2015 Ian Kuehne.
+ *
+ * Email: ikuehne@caltech.edu
+ *
+ * This file is part of Bogoscheme.
+ *
+ * Bogoscheme is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * Bogoscheme is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * Bogoscheme.  If not, see <http://www.gnu.org/licenses/>.
+ *
  *)
 
 open Errors
@@ -21,6 +29,10 @@ let blue s = "\027[34m" ^ s ^ "\027[0m"
 (* Return a new string that will print green. *)
 let green s = "\027[32m" ^ s ^ "\027[0m"
 
+(* Execute an S-expression using the given environment.  May modify the
+ * environment.  If a value is produced, it prints an arrow followed by the
+ * value.  If any errors are thrown, it prints them to stderr and does nothing.
+ * Returns (). *)
 let execute_expression env = function
    | None       -> ()
    | Some sexpr -> let value = Eval.eval (Ast.ast_of_sexpr sexpr) env in
@@ -29,9 +41,10 @@ let execute_expression env = function
                       print_string (blue "->> ");
                       print_endline (Env.string_of_value value)
                    | Error es -> List.iter es ~f:Errors.print;
-                     flush stderr
+                                 flush stderr
 
-
+(* Execute the given program file (given as a channel), loading values it
+ * produces in the given environment. *)
 let load_program env infile =
    Sequence.iter (Parser.stream_from_channel infile)
       ~f:(fun sexpr ->
@@ -42,12 +55,15 @@ let load_program env infile =
                           flush stderr
             | _ -> ())
 
+(* Create a new environment and load primitives and standard functions into it.
+ *)
 let make_env () =
    let env = Env.make None in
    Primitives.load env;
    load_program env (In_channel.create "./runtime.bs");
    env
 
+(* Run the program given in a fresh environment, and return nothing. *)
 let run_program infile = 
    let env = make_env () in
    Sequence.iter (Parser.stream_from_channel infile)
@@ -59,6 +75,7 @@ let run_program infile =
                           flush stderr
             | _ -> ())
 
+(* Create a new environment and run an interactive REPL in it. *)
 let repl_loop () =
    let rec loop env =
       print_string (green "=> ");
