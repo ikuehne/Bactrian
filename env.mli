@@ -22,8 +22,8 @@
 (**
     Environments and the values that they contain.
  
-    Env implements an env type which matches identifiers to values.  The mapping
-    is implemented as a hashtable with string keys.
+    Env implements a mutable type which matches identifiers to values.  The
+    mapping is implemented as a hashtable with string keys.
  *)
 
 open Core.Std

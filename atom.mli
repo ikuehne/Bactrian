@@ -29,6 +29,7 @@
 
 open Core.Std
 
+(** Type of atomic expressions. *)
 type t =
    | Unit
    | Bool of bool

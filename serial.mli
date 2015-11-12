@@ -28,9 +28,8 @@
 
 open Core.Std
 
-(** Provides convenient serialization via s-expressions. *)
+(** A functor that provides convenient serialization via s-expressions. *)
 module Serialized(M : sig
-
    (** Type of data to be serialized. *)
    type t
 

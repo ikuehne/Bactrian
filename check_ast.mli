@@ -20,13 +20,12 @@
  *)
 
 (**
-    Checks an AST from Ast and ensures that there are no error types in
-    it. Returns a checked AST with no error types and a list of errors.
+    Pulling errors out of general ASTs.
  *)
 
 open Core.Std
 
-(* Type of AST expressions without errors. *)
+(** Type of AST expressions without errors. *)
 type t =
    | Unit
    | Bool   of bool
@@ -41,4 +40,6 @@ type t =
    | Apply  of t * t list
    | Quote  of Sexpr.t
 
+(** Take an AST potentially with error types scattered throughout and return 
+    either an AST guaranteed to have no errors, or a list of errors found. *)
 val check : Ast.t -> (t, Errors.t list) Result.t

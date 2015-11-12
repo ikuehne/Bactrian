@@ -42,7 +42,7 @@
 
 open Core.Std
 
-(* A type containing all possible errors. *)
+(** A type containing all possible errors. *)
 type t =
    (* Error for invalid literals, such as a nonexistent character (for
       example #\foo). The string simply holds the entered literal. *)

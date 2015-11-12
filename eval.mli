@@ -28,4 +28,6 @@
 
 open Core.Std
 
+(** Take an AST, an environment in which to evaluate it, and produce either a
+    value or a list of errors. *)
 val eval : Ast.t -> Env.t -> (Env.value, Errors.t list) Result.t
