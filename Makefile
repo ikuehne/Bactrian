@@ -17,10 +17,9 @@
 # You should have received a copy of the GNU General Public License along with
 # Bogoscheme.  If not, see <http://www.gnu.org/licenses/>.
 #
-#
  
 #
-# Makefile for OCaml Scheme interpreter.
+# Makefile for Bogoscheme.
 #
 
 # The OCaml compiler.
@@ -29,8 +28,22 @@ OCAMLC = opt
 # The build command.
 BUILD = corebuild -ocamlopt $(OCAMLC)
 
+# Files to remove.
+CLEANUP = bs yacc.ml yacc.mli parser_test lexer_test ast_test *.native
+
 # Default compilation.
 default: test bs
+
+# Run all unit tests.
+test: lexer_test parser_test ast_test
+	./lexer_test
+	./parser_test
+	./ast_test
+
+# Clean the current directory by deleting executables, object files, etc.
+clean:
+	corebuild -clean
+	rm -f $(CLEANUP)
 
 # Simple compilation of interpreter using corebuild.
 bs: main.native
@@ -59,13 +72,3 @@ parser_test: yacc.ml yacc.mli
 ast_test:
 	corebuild ast_test.native
 	mv ast_test.native ast_test
-
-test: lexer_test parser_test ast_test
-	./lexer_test
-	./parser_test
-	./ast_test
-
-clean:
-	corebuild -clean
-	rm -f ./bs ./yacc.ml ./yacc.mli ./parser_test ./lexer_test ./ast_test *.native
-
