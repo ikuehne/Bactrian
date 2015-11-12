@@ -1,0 +1,33 @@
+ 
+                                 BOGOSCHEME
+
+INTRODUCTION:
+
+    Bogoscheme is an interpreter for a simple Scheme-like language.  The
+    language and implementation are changing rapidly and primarily intended as
+    an instructive project, so the language will mostly go undocumented for the
+    moment.
+
+USAGE:
+
+    After cloning the repository, simply type:
+
+    $ make
+
+    to compile.  OCaml, ocamllex, ocamlyacc, and the Core standard library are
+    required to build bogoscheme.  The resulting executable will be amusingly
+    called "bs".  It will display a message and prompt when run.  An example
+    session:
+
+    => (define x 10)
+    ->> #u
+    => x
+    ->> 10
+
+    "=>" is the default prompt, and "->>" indicates a return value.  '#u' is the
+    unit value, which is returned from statements that do not produce a value.
+
+AUTHOR:
+
+    Ian Kuehne
+    ikuehne@caltech.edu
