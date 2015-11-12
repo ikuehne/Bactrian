@@ -60,17 +60,15 @@
 	  (aux (cdr l) (cons (car l) accum)))))
     (lambda (l) (aux l nil))))
 
-(print (reverse (list 1 2 3 4 5)))
-
 ; Right fold over lists.
 (define foldr
   (lambda (f init lst)
-    (reverse
-      (fold f init (reverse lst)))))
+      (fold f init (reverse lst))))
 
-;(define map
-;  (lambda (f lst)
-;    (fold
-;      (lambda (b_list a)
-;	(cons (f a) b_list))
-	
+(define map
+  (lambda (f lst)
+    (foldr
+      (lambda (b_list a)
+	(cons (f a) b_list))
+      ()
+      lst)))
