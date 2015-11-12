@@ -1,6 +1,8 @@
  
                                  BOGOSCHEME
 
+Copyright Ian Kuehne 2015.
+
 INTRODUCTION:
 
     Bogoscheme is an interpreter for a simple Scheme-like language.  The
