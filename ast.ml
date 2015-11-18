@@ -3,19 +3,19 @@
  *
  * Email: ikuehne@caltech.edu
  *
- * This file is part of Bogoscheme.
+ * This file is part of Bactrian.
  *
- * Bogoscheme is free software: you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation, either version 3 of the License, or (at your option) any
- * later version.
+ * Bactrian is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  *
- * Bogoscheme is distributed in the hope that it will be useful, but WITHOUT ANY
+ * Bactrian is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along with
- * Bogoscheme.  If not, see <http://www.gnu.org/licenses/>.
+ * Bactrian.  If not, see <http://www.gnu.org/licenses/>.
  *
  *)
 
@@ -25,7 +25,7 @@ open Core.Std
 module S = Sexpr
 
 module T = struct
-    (* Type of Bogoscheme expressions, representing the abstract syntax tree. *)
+    (* Type of Bactrian expressions, representing the abstract syntax tree. *)
     type t =
        | Unit
        | Bool   of bool
