@@ -29,10 +29,10 @@ OCAMLC = opt
 BUILD = corebuild -ocamlopt $(OCAMLC)
 
 # Files to remove.
-CLEANUP = bs yacc.ml yacc.mli parser_test lexer_test ast_test *.native *.cmi
+CLEANUP = bactrian yacc.ml yacc.mli parser_test lexer_test ast_test *.native *.cmi
 
 # Default compilation.
-default: test bs
+default: test bactrian
 
 # Run all unit tests.
 test: lexer_test parser_test ast_test
@@ -46,8 +46,8 @@ clean:
 	rm -f $(CLEANUP)
 
 # Simple compilation of interpreter using corebuild.
-bs: main.native
-	mv main.native bs
+bactrian: main.native
+	mv main.native bactrian
 
 main.native: yacc.ml yacc.mli
 	$(BUILD) main.native
