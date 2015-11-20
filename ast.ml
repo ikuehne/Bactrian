@@ -117,16 +117,37 @@ and check_id sexpr =
    match ast_of_sexpr sexpr with
    | ID id -> Ok id
    | ast   -> Error (Errors.Type ("ID", get_type ast))
- 
+
 (* Create an AST from an s-expression representing a definition. *)
 and ast_of_def = function
+(* Case simple definition. *)
 | [a; b] -> begin
-               match check_id a with
-               | Ok id   -> Define (Ok (id, ast_of_sexpr b))
-               | Error e -> Define (Error e)
+               match a with
+               | S.Atom _ ->
+                  begin
+                     match check_id a with
+                     | Ok id   -> Define (Ok (id, ast_of_sexpr b))
+                     | Error e -> Define (Error e)
+                  end
+               | S.List ((S.Atom (Atom.ID name)) :: args) ->
+                  let lambda = ast_of_lambda ((S.List args) :: [b]) in
+                  Define (Ok (name, lambda))
+               | _ -> 
+                  let error_type = a |> ast_of_sexpr |> get_type in
+                  Define (Error (Errors.Type ("ID or ID list", error_type)))
             end
-| lst    -> Define (Error (Argument ("define", 2, (List.length lst))))
+| a :: l -> begin
+               match a with
+               | S.List ((S.Atom (Atom.ID name)) :: args) ->
+                  let lambda = ast_of_lambda ((S.List args) :: l) in
+                  Define (Ok (name, lambda))
+               | _ -> 
+                  let error_type = a |> ast_of_sexpr |> get_type in
+                  Define (Error (Errors.Type ("ID or ID list", error_type)))
+            end
+| [] -> Define (Error (Argument ("define", 2, 0)))
 
+(* (define (f x) (+ x 1)) *)
 (* Check that an s-expression is a list, returning a Result.t with an
  * Error.Type _ if it is not. *)
 and check_list = function
