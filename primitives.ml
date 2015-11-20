@@ -207,9 +207,9 @@ let eval env l =(* function
 (* Load the primitive functions into an environment, 
    along with their names. *)
 let load env =
-   let ops = [ (add, "+")
+   let ops = [ (add, "+.")
              ; (sub, "-")
-             ; (mul, "*")
+             ; (mul, "*.")
              ; (div, "/")
              ; (eq, "=") 
              ; (ne, "!=")

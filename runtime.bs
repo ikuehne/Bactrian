@@ -17,6 +17,7 @@
 ; You should have received a copy of the GNU General Public License along with
 ; Bactrian.  If not, see <http://www.gnu.org/licenses/>.
 
+
 ;;
 ;; The part of the Bactrian runtime written in Bactrian.
 ;;
@@ -24,13 +25,16 @@
 ;; Control structures.
 
 ; Composition operator.
-(define .
-  (lambda (f g)
-    (lambda (x)
-      (f (g x)))))
+(define (. f g)
+  (lambda (x)
+    (f (g x))))
 
 ; Sequencing operations. Evaluate all arguments, returning only the last one.
-(define seq (lambda args (fold (lambda (x y) y) () args)))
+(define seq 
+  (lambda args 
+    (fold (lambda (x y) y)
+          ()
+          args)))
 
 ;; List functions.
 
@@ -41,34 +45,36 @@
 (define nil ())
 
 ; Check if a value is nil.
-(define nil? (lambda (x) (= nil x)))
+(define (nil? x) (= nil x))
 
 ; Left fold over lists.
-(define fold
-  (lambda (f init lst)
-     (if (nil? lst)
-       init
-       (fold f (f init (car lst)) (cdr lst)))))
+(define (fold f init lst)
+  (if (nil? lst)
+    init
+    (fold f (f init (car lst)) (cdr lst))))
 
 ; Reverse a list.
 (define reverse
   (seq
-    (define aux
-      (lambda (l accum)
-	(if (nil? l)
-	  accum
-	  (aux (cdr l) (cons (car l) accum)))))
+    (define (aux l accum)
+        (if (nil? l)
+          accum
+          (aux (cdr l) (cons (car l) accum))))
     (lambda (l) (aux l nil))))
 
 ; Right fold over lists.
-(define foldr
-  (lambda (f init lst)
-      (fold f init (reverse lst))))
+(define (foldr f init lst)
+  (fold f init (reverse lst)))
 
-(define map
-  (lambda (f lst)
-    (foldr
-      (lambda (b_list a)
-	(cons (f a) b_list))
-      ()
-      lst)))
+; Map a function over a list.
+(define (map f lst)
+  (foldr
+    (lambda (b_list a)
+      (cons (f a) b_list))
+    ()
+    lst))
+
+; Variadic '+' and '*' functions.  The faster binary operations are available as
+; '+.' and '-.'.
+(define + (lambda args (fold +. 0 args)))
+(define * (lambda args (fold *. 0 args)))
