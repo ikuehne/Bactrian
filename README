@@ -29,9 +29,8 @@ USAGE:
     ->> 10
     => (map - '(1 2 3))
     ->> (-1 -2 -3)
-    => (define minus-list              
-           (lambda (lst) 
-                   (map - lst)))
+    => (define (minus-list lst)
+	       (map - lst))
     ->> #u
     => (minus-list '(1 2 3))
     ->> (-1 -2 -3)
