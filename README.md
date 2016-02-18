@@ -21,21 +21,21 @@ to compile.  OCaml, ocamllex, ocamlyacc, and the Core standard library are
 required to build Bactrian.  The resulting executable will be called "bactrian".
 It will display a message and prompt when run.  An example session:
 
-$ ./bactrian
-Welcome to Bactrian v. 0.0!
-=> (define x 10)
-->> #u
-=> x
-->> 10
-=> (map - '(1 2 3))
-->> (-1 -2 -3)
-=> (define (minus-list lst)
-           (map - lst))
-->> #u
-=> (minus-list '(1 2 3))
-->> (-1 -2 -3)
+    $ ./bactrian
+    Welcome to Bactrian v. 0.0!
+    => (define x 10)
+    ->> #u
+    => x
+    ->> 10
+    => (map - '(1 2 3))
+    ->> (-1 -2 -3)
+    => (define (minus-list lst)
+               (map - lst))
+    ->> #u
+    => (minus-list '(1 2 3))
+    ->> (-1 -2 -3)
 
-"=>" is the default prompt, and "->>" indicates a return value.  '#u' is the
+`=>` is the default prompt, and `->>` indicates a return value.  `#u` is the
 unit value, which is returned from statements that do not produce a value.
 
 Conditions
@@ -57,4 +57,5 @@ Author
 ------
 
 Ian Kuehne
+
 ikuehne@caltech.edu
