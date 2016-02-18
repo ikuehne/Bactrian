@@ -76,4 +76,4 @@
 ; Variadic '+' and '*' functions.  The faster binary operations are available as
 ; '+.' and '-.'.
 (define + (lambda args (fold +. 0 args)))
-(define * (lambda args (fold *. 0 args)))
+(define * (lambda args (fold *. 1 args)))

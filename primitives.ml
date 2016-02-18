@@ -26,7 +26,7 @@ open Core.Std
  * Define the primitive functions. 
  *)
 
-(* Subtract two integers. *)
+(* Add two integers. *)
 let add _ = function
    | [Env.Val_int i1; Env.Val_int i2] ->
          Env.Val_int (i1 + i2)
