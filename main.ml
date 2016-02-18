@@ -43,17 +43,20 @@ let execute_expression env = function
                    | Error es -> List.iter es ~f:Errors.print;
                                  flush stderr
 
+(* Take an evaluation and either print the associated errors or ignore the
+ * value. *)
+let ignore_val = function
+   | Error es -> List.iter es ~f:Errors.print;
+                 flush stderr
+   | _ -> ()
+
 (* Execute the given program file (given as a channel), loading values it
  * produces in the given environment. *)
 let load_program env infile =
    Sequence.iter (Parser.stream_from_channel infile)
       ~f:(fun sexpr ->
          let expr = Ast.ast_of_sexpr sexpr in
-         let s = Eval.eval expr env in
-         match s with 
-            | Error es -> List.iter es ~f:Errors.print;
-                          flush stderr
-            | _ -> ())
+         ignore_val (Eval.eval expr env))
 
 (* Create a new environment and load primitives and standard functions into it.
  *)

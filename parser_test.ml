@@ -29,8 +29,8 @@
 open Core.Std
 
 module T = struct
-   let test_folder      = "bs_tests"
-   let test_extension   = ".bs"
+   let test_folder      = "bac_tests"
+   let test_extension   = ".bac"
    let result_folder    = "parser_results"
    let result_extension = ".par"
 

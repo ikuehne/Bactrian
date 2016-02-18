@@ -35,6 +35,8 @@ let rec of_sexp = function
    | Sexp.List [Sexp.Atom "Atom"; s]  -> Atom (Atom.of_sexp s)
    | Sexp.List [Sexp.Atom "List"; Sexp.List l] -> List (List.map ~f:of_sexp l)
    | Sexp.List [Sexp.Atom "Quote"; s] -> Quote (of_sexp s)
+   | a -> raise (Sexplib.Conv.Of_sexp_error
+                  ((failwith "Error: Sexp.List needed."), a))
 
 let to_string t = t |> to_sexp |> Sexp.to_string
 let of_string s = s |> Sexp.of_string |> of_sexp

@@ -48,7 +48,7 @@ let rec string_of_value =
    | Val_float f       -> Float.to_string f
    | Val_char c        -> "#\\" ^ String.make 1 c
    | Val_string s      -> "\"" ^ s ^ "\""
-   | (Val_cons (x1, x2)) as c -> "(" ^ (aux_cons c)
+   | (Val_cons _) as c -> "(" ^ (aux_cons c)
    | Val_prim _
    | Val_lambda _      -> "lambda expression"
 

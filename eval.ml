@@ -111,4 +111,4 @@ let eval ast env =
    let checked_ast = Check_ast.check ast in
    match checked_ast with
    | Ok ast -> Ok (eval_checked ast env)
-   | (Error e) as x -> x
+   | (Error _) as x -> x

@@ -23,9 +23,9 @@ open Core.Std
 
 module T = struct
    (* Name of folder from which to retrieve tests. *)
-   let test_folder = "bs_tests"
+   let test_folder = "bac_tests"
    (* Extension for test files. *)
-   let test_extension = ".bs"
+   let test_extension = ".bac"
 
    (* Name of folder from which to retrieve correct results. *)
    let result_folder = "lexer_results"
