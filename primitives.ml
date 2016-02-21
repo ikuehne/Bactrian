@@ -125,9 +125,27 @@ let float_to_int _ = function
 (* Print a value. *)
 let print _ = function
    | [value] -> 
-        Printf.printf "%s" (Env.string_of_value value);
+        print_string (Env.string_of_value value);
         Env.Val_unit
    | l -> raise (Invalid_Args ("print", 1, List.length l))
+
+let escape_sequences = 
+   [("\\n", "\n")]
+
+let escape str =
+   let escape1 s (seq, esc) = String.substr_replace_all s
+                                                        ~pattern:seq
+                                                        ~with_:esc in
+   List.fold escape_sequences ~init:str ~f:escape1
+
+(* Print a string. *)
+let print_string _ = function
+   | [Env.Val_string s] -> print_string @@ escape s;
+                           Env.Val_unit
+   | [v]                -> raise (Type_Error ("String", Env.type_of_value v))
+   | l                  -> raise (Invalid_Args ("print-string",
+                                                1,
+                                                List.length l))
 
 (* Exits the repl. *)
 let exit _ = function
@@ -192,7 +210,7 @@ let list_to_string _ =
       | l -> raise (Invalid_Args ("list->string", 1, List.length l))
 
 (* Evaluate a list or quoted expression. *)
-let eval env l =(* function
+let eval _ l =(* function
    | [Env.Val_quote l] ->
       let result = l
                 |> Ast.ast_of_sexpr
@@ -218,6 +236,7 @@ let load env =
              ; (le, "<=")
              ; (ge, ">=")
              ; (print, "print")
+             ; (print_string, "print-string")
              ; (exit, "exit")
              ; (float_to_int, "float->int")
              ; (int_to_float, "int->float")
