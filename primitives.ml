@@ -214,7 +214,7 @@ let eval _ l =(* function
    | [Env.Val_quote l] ->
       let result = l
                 |> Ast.ast_of_sexpr
-                |> fun a -> Eval.eval a env in
+                |> fun a -> Env.eval a env in
       begin
          match result with
          | Ok x -> x
