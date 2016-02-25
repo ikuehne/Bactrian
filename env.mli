@@ -42,7 +42,7 @@ type value =
    | Val_lambda of (t -> value list -> value)
 
 (** Type of environments. *)
-and t = { parent: t option; bindings: value String.Table.t }
+and t
 
 (** Convert a value into a string representing its type. *)
 val type_of_value : value -> string

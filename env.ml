@@ -22,6 +22,9 @@
 open Errors
 open Core.Std
 
+(* Default starting size for an environment. *)
+let env_size = 2
+
 type value = 
    | Val_unit
    | Val_bool   of bool
@@ -33,7 +36,7 @@ type value =
    | Val_cons   of value * value
    | Val_lambda of (t -> value list -> value)
 
-and t = { parent: t option; bindings: value String.Table.t }
+and t = value String.Table.t list
 
 let rec string_of_value =
    let rec aux_cons = function
@@ -67,18 +70,22 @@ let type_of_value = function
  * Environment operations.
  *)
 
-let make parent = { parent = parent; bindings = String.Table.create ()
-                                                                    ~size:20 }
+let make =
+   let new_frame = String.Table.create () ~size:env_size in
+   function
+   | None   -> [new_frame]
+   | Some p -> new_frame :: p
 
 let rec lookup env name = 
-   let { parent = p; bindings = b } = env in
-   let open Option.Monad_infix in
-   match Hashtbl.find b name with
-   | None   -> p >>= (fun e -> lookup e name)
-   | x -> x
+   match env with
+   | [] -> None
+   | x :: p -> begin
+       match Hashtbl.find x name with
+       | None -> lookup p name
+       | x    -> x
+   end
 
-let add env key data = 
-   Hashtbl.set env.bindings ~key ~data
+let add env key data = Hashtbl.set (List.hd_exn env) ~key ~data
 
 let add_all env names values = 
    match List.zip names values with
