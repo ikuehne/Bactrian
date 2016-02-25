@@ -20,11 +20,11 @@
  *)
 
 (**
-    Scheme s-expressions.
+    Bactrian s-expressions.
  
-    Sexpr contains the type representing s-expressions for the Scheme
+    Sexpr contains the type representing s-expressions for the Bactrian
     interpreter, not to be comfused with the serialization format from Core,
-    which is contained in Sexp.
+    which is contained in Sexp (no "r").
  *)
 
 open Core.Std
