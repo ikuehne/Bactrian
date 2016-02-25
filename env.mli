@@ -39,6 +39,7 @@ type value =
    | Val_string  of string
    | Val_id      of string
    | Val_cons    of value * value
+   | Val_nil
    | Val_lambda of (t -> value list -> value)
 
 (** Type of environments. *)

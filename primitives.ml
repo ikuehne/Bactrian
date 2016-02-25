@@ -158,14 +158,15 @@ let exit _ = function
    | l -> raise (Invalid_Args ("exit", 1, List.length l))
 
 (* List construction functions. *)
-let cons_of_list = List.fold_right ~init:Env.Val_unit
+let cons_of_list = List.fold_right ~init:Env.Val_nil
                                    ~f:(fun x y -> Env.Val_cons (x, y))
 
 let rec list_of_cons = function
    | Env.Val_cons (x1, x2) -> x1 :: (list_of_cons x2)
-   | Env.Val_unit          -> []
+   | Env.Val_nil           -> []
    | other                 -> raise (Type_Error ("List",
-                                                 Env.type_of_value other))
+                                                 Env.type_of_value other)
+                                                                               )
 
 let cons _ = function
    | [v1; v2] -> Env.Val_cons (v1, v2)
@@ -173,15 +174,15 @@ let cons _ = function
 
 let cdr _ = function
    | [Env.Val_cons (_, x)] -> x
-   | [v] -> raise (Type_Error ("List", Env.type_of_value v))
-   | l -> raise (Invalid_Args ("cdr", 1, List.length l))
+   | [v]                   -> raise (Type_Error ("List", Env.type_of_value v))
+   | l                     -> raise (Invalid_Args ("cdr", 1, List.length l))
 
 let car _ = function
    | [Env.Val_cons (x, _)] -> x
-   | [v] -> raise (Type_Error ("List", Env.type_of_value v))
-   | l -> raise (Invalid_Args ("cdr", 2, List.length l))
+   | [v]                   -> raise (Type_Error ("List", Env.type_of_value v))
+   | l                     -> raise (Invalid_Args ("cdr", 2, List.length l))
 
-let nil = Env.Val_unit
+let nil = Env.Val_nil
 
 (* String handling functions. *)
 let strindex _ = function
@@ -249,7 +250,7 @@ let load env =
              ; (strindex, "string-index")
              ; (eval, "eval") ] in
    List.iter ~f:(fun (op, name) -> Env.add env name (Env.Val_lambda op)) ops;
-   Env.add env "nil" nil
+   Env.add env "nil" Val_nil
 
 let ignore_val = function
    | Error es -> List.iter es ~f:Errors.print;

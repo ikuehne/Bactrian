@@ -41,7 +41,7 @@
 (define list (lambda args args))
 
 ; Alias for the unit value.
-(define nil ())
+(define nil '())
 
 ; Check if a value is nil.
 (define (nil? x) (= nil x))
@@ -70,7 +70,7 @@
   (foldr
     (lambda (b_list a)
       (cons (f a) b_list))
-    ()
+    '()
     lst))
 
 ; Variadic '+' and '*' functions.  The faster binary operations are available as

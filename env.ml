@@ -34,17 +34,19 @@ type value =
    | Val_string of string
    | Val_id     of string
    | Val_cons   of value * value
+   | Val_nil
    | Val_lambda of (t -> value list -> value)
 
 and t = value String.Table.t list
 
 let rec string_of_value =
    let rec aux_cons = function
-      | Val_cons (x1, Val_unit) -> (string_of_value x1) ^ ")"
+      | Val_nil           -> ")"
       | Val_cons (x1, x2) -> (string_of_value x1) ^ " " ^ (aux_cons x2)
       | other             -> ". " ^ (string_of_value other) ^ ")" in
    function
    | Val_unit          -> "#u"
+   | Val_nil           -> "()"
    | Val_bool true     -> "#t"
    | Val_bool false    -> "#f"
    | Val_int i         -> string_of_int i
@@ -65,6 +67,7 @@ let type_of_value = function
    | Val_id _       -> "Identifier"
    | Val_cons _     -> "List"
    | Val_lambda _   -> "Lambda"
+   | Val_nil        -> "Nil"
 
 (* 
  * Environment operations.
@@ -99,7 +102,7 @@ let add_all env names values =
  * Evaluation of expressions.
  *)
 
-let cons_of_list = List.fold_right ~init:Val_unit
+let cons_of_list = List.fold_right ~init:Val_nil
                                    ~f:(fun x y -> Val_cons (x, y))
 
 let rec quote_to_list =
