@@ -53,7 +53,6 @@ let ignore_val = function
 (* Execute the given program file (given as a channel), loading values it
  * produces in the given environment. *)
 let load_program env infile =
-(*    let new_env = Env.make (Some env) in *)
    Sequence.iter (Parser.stream_from_channel infile)
       ~f:(fun sexpr ->
          let expr = Ast.ast_of_sexpr sexpr in
