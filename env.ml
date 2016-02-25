@@ -31,7 +31,6 @@ type value =
    | Val_string of string
    | Val_id     of string
    | Val_cons   of value * value
-   | Val_prim   of (t -> value list -> value)
    | Val_lambda of (t -> value list -> value)
 
 and t = { parent: t option; bindings: value String.Table.t }
@@ -51,7 +50,6 @@ let rec string_of_value =
    | Val_string s      -> "\"" ^ s ^ "\""
    | Val_id s           -> s
    | (Val_cons _) as c -> "(" ^ (aux_cons c)
-   | Val_prim _
    | Val_lambda _      -> "lambda expression"
 
 let type_of_value = function
@@ -63,7 +61,6 @@ let type_of_value = function
    | Val_string _   -> "String"
    | Val_id _       -> "Identifier"
    | Val_cons _     -> "List"
-   | Val_prim _ 
    | Val_lambda _   -> "Lambda"
 
 (* 
@@ -149,7 +146,6 @@ let rec eval_checked ast env =
          begin
             (* Evaluate the function. *)
             match eval_checked f env with
-               | Val_prim prim -> prim env operands
                | Val_lambda f -> f env operands
                | x -> raise (Syntax_Error ("Value "
                                          ^ (string_of_value x)

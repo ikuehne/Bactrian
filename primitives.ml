@@ -247,5 +247,5 @@ let load env =
              ; (cons, "cons")
              ; (strindex, "string-index")
              ; (eval, "eval") ] in
-   List.iter ~f:(fun (op, name) -> Env.add env name (Env.Val_prim op)) ops;
+   List.iter ~f:(fun (op, name) -> Env.add env name (Env.Val_lambda op)) ops;
    Env.add env "nil" nil
