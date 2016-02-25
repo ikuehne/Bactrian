@@ -1,0 +1,27 @@
+(print-string "Testing linear recursion performance...\n")
+
+(define (recursion-test n)
+  (if (= n 0)
+      0
+      (+ n (recursion-test (- n 1)))))
+
+(define depth 10000)
+
+(print (recursion-test 55000))
+
+(print-string "\n")
+
+(print-string "Testing deep tree recursion performance...\n")
+
+(define (ackermann m n)
+  (if (= m 0) 
+      (+ n 1)
+      (if (= n 0)
+          (ackermann (- m 1)
+                     1)
+          (ackermann (- m 1)
+                     (ackermann m (- n 1))))))
+
+(print (ackermann 3 4))
+
+(print-string "\n")
