@@ -32,7 +32,7 @@ type value =
    | Val_id     of string
    | Val_cons   of value * value
    | Val_prim   of (t -> value list -> value)
-   | Val_lambda of t * string list * string option * Check_ast.t list
+   | Val_lambda of (t -> value list -> value)
 
 and t = { parent: t option; bindings: value String.Table.t }
 
@@ -115,13 +115,8 @@ let rec quote_to_list =
    | Sexpr.List l  -> cons_of_list (List.map ~f:quote_to_list l)
    | Sexpr.Quote q -> quote_to_list q
 
-let rec eval_checked ast env =
 
-   let rec eval_lambda env xs = match xs with
-      | [] -> Val_unit
-      | [x] -> eval_checked x env
-      | x :: xs -> ignore (eval_checked x env);
-                   eval_lambda env xs in
+let rec eval_checked ast env =
 
    let handle_lookup name = function
       | None   -> raise (Name_Error name)
@@ -147,8 +142,7 @@ let rec eval_checked ast env =
             | x -> raise (Type_Error ("ID",
                                       type_of_value x))
          end
-      | Check_ast.Lambda l -> 
-         Val_lambda (env, l.args, l.var_arg, l.code)
+      | Check_ast.Lambda l -> Val_lambda (function_of_lambda l)
       | Check_ast.Apply (f, args) ->
          (* Evaluate all the arguments. *)
          let operands = List.map ~f:(fun x -> eval_checked x env) args in
@@ -156,29 +150,35 @@ let rec eval_checked ast env =
             (* Evaluate the function. *)
             match eval_checked f env with
                | Val_prim prim -> prim env operands
-               | (Val_lambda (env, ids, None, exprs)) as lambda ->
-                     let new_env  = make (Some env) in
-                     begin
-                        try
-                           add_all new_env ids operands;
-                        with Invalid_argument _ ->
-                           raise (Invalid_Args (string_of_value lambda,
-                                                List.length ids,
-                                                List.length operands))
-                     end;
-                     eval_lambda new_env exprs
-               | Val_lambda (env, [], Some args, exprs) ->
-                     let new_env  = make (Some env) in
-                     let arg_list = operands
-                                 |> cons_of_list in
-                     add new_env args arg_list;
-                     eval_lambda new_env exprs
+               | Val_lambda f -> f env operands
                | x -> raise (Syntax_Error ("Value "
                                          ^ (string_of_value x)
                                          ^ " is not a function; "
                                          ^ "cannot apply."))
          end
       | Check_ast.Quote s -> quote_to_list s
+and function_of_lambda {Check_ast.args; var_arg; code} env arguments =
+   let rec eval_lambda env = function
+      | [] -> Val_unit
+      | [x] -> eval_checked x env
+      | x :: xs -> ignore (eval_checked x env);
+                   eval_lambda env xs in
+   let new_env = make (Some env) in
+   begin
+      match var_arg with
+      | None -> begin
+                   try
+                      add_all new_env args arguments;
+                  with Invalid_argument _ ->
+                     raise (Invalid_Args ("<lambda expression>",
+                                          List.length args,
+                                          List.length arguments))
+                end
+      | Some args -> let arg_list = arguments |> cons_of_list in
+                     add new_env args arg_list;
+   end;
+   eval_lambda new_env code
+
 
 let eval ast env =
    let checked_ast = Check_ast.check ast in
