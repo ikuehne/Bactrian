@@ -41,9 +41,10 @@ and t = value String.Table.t list
 
 let rec string_of_value =
    let rec aux_cons = function
-      | Val_nil           -> ")"
-      | Val_cons (x1, x2) -> (string_of_value x1) ^ " " ^ (aux_cons x2)
-      | other             -> ". " ^ (string_of_value other) ^ ")" in
+      | Val_nil                -> ")"
+      | Val_cons (x1, Val_nil) -> (string_of_value x1) ^ ")"
+      | Val_cons (x1, x2)      -> (string_of_value x1) ^ " " ^ (aux_cons x2)
+      | other                  -> ". " ^ (string_of_value other) ^ ")" in
    function
    | Val_unit          -> "#u"
    | Val_nil           -> "()"
