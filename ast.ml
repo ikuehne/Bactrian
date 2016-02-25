@@ -147,7 +147,6 @@ and ast_of_def = function
             end
 | [] -> Define (Error (Argument ("define", 2, 0)))
 
-(* (define (f x) (+ x 1)) *)
 (* Check that an s-expression is a list, returning a Result.t with an
  * Error.Type _ if it is not. *)
 and check_list = function

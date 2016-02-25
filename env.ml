@@ -29,6 +29,7 @@ type value =
    | Val_float  of float
    | Val_char   of char
    | Val_string of string
+   | Val_id     of string
    | Val_cons   of value * value
    | Val_prim   of (t -> value list -> value)
    | Val_lambda of t * string list * string option * Check_ast.t list
@@ -48,6 +49,7 @@ let rec string_of_value =
    | Val_float f       -> Float.to_string f
    | Val_char c        -> "#\\" ^ String.make 1 c
    | Val_string s      -> "\"" ^ s ^ "\""
+   | Val_id s           -> s
    | (Val_cons _) as c -> "(" ^ (aux_cons c)
    | Val_prim _
    | Val_lambda _      -> "lambda expression"
@@ -59,6 +61,7 @@ let type_of_value = function
    | Val_float _    -> "Float"
    | Val_char _     -> "Char"
    | Val_string _   -> "String"
+   | Val_id _       -> "Identifier"
    | Val_cons _     -> "List"
    | Val_prim _ 
    | Val_lambda _   -> "Lambda"

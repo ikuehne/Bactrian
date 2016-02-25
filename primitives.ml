@@ -248,3 +248,4 @@ let load env =
              ; (strindex, "string-index")
              ; (eval, "eval") ] in
    List.iter ~f:(fun (op, name) -> Env.add env name (Env.Val_prim op)) ops;
+   Env.add env "nil" nil

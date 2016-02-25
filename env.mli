@@ -37,6 +37,7 @@ type value =
    | Val_float   of float
    | Val_char    of char
    | Val_string  of string
+   | Val_id      of string
    | Val_cons    of value * value
    | Val_prim    of (t -> value list -> value)
    | Val_lambda  of t * string list * string option * Check_ast.t list
