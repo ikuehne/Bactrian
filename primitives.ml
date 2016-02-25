@@ -182,8 +182,6 @@ let car _ = function
    | [v]                   -> raise (Type_Error ("List", Env.type_of_value v))
    | l                     -> raise (Invalid_Args ("cdr", 2, List.length l))
 
-let nil = Env.Val_nil
-
 (* String handling functions. *)
 let strindex _ = function
    | [Env.Val_int i; Env.Val_string s] -> Env.Val_char s.[i]
