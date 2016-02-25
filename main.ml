@@ -21,10 +21,32 @@
 open Errors
 open Core.Std
 
-(* Return a new string that will print blue. *)
+
+(* 
+ * Strings displayed by the REPL.
+ *)
+
+(* Return a new string escaped so that it will print blue.  The escape is also
+ * terminated, so other strings may be concatenated to the result and they will
+ * not print blue. *)
 let blue s = "\027[34m" ^ s ^ "\027[0m"
-(* Return a new string that will print green. *)
+(* Return a new string escaped so that it will print green.  The escape is also
+ * terminated, so other strings may be concatenated to the result and they will
+ * not print green. *)
 let green s = "\027[32m" ^ s ^ "\027[0m"
+
+(* The REPL prompt. *)
+let prompt = green "=> "
+(* A string displayed to indicate the result of evaluating an expression in the
+ * REPL. *)
+let return_arrow = blue "->> "
+(* A message displayed on starting Bactrian. *)
+let welcome_message = blue "Welcome to Bactrian!"
+
+
+(* 
+ * REPL utilities.
+ *)
 
 (* Execute an S-expression using the given environment.  May modify the
  * environment.  If a value is produced, it prints an arrow followed by the
@@ -35,7 +57,7 @@ let execute_expression env = function
    | Some sexpr -> let value = Env.eval (Ast.ast_of_sexpr sexpr) env in
                    match value with
                    | Ok value ->
-                      print_string (blue "->> ");
+                      print_string return_arrow;
                       print_endline (Env.string_of_value value)
                    | Error es -> List.iter es ~f:Errors.print;
                                  flush stderr
@@ -46,6 +68,11 @@ let ignore_val = function
    | Error es -> List.iter es ~f:Errors.print;
                  flush stderr
    | _ -> ()
+
+
+(*
+ * Other interpreter utilities.
+ *)
 
 (* Execute the given program file (given as a channel), loading values it
  * produces in the given environment. *)
@@ -69,31 +96,30 @@ let run_program infile =
 (* Create a new environment and run an interactive REPL in it. *)
 let repl_loop () =
    let rec loop env =
-      print_string (green "=> ");
+      print_string prompt;
       flush stdout;
       begin
          try execute_expression env (Parser.sexpr_from_channel stdin)
          with e -> print_exn e
       end;
       loop env in
+   print_endline welcome_message;
    loop Primitives.initial
 
-(* Entry point of the interpreter. *)
+(*
+ * Entry point of the interpreter.
+ *)
 let () = 
-   if Array.length Sys.argv <> 2 then
-      begin
-         print_endline (blue "Welcome to Bactrian v. 0.0! ");
-         repl_loop ()
-      end
+   (* Given no arguments, start a REPL session. *)
+   if Array.length Sys.argv = 1 then repl_loop ()
+   (* Otherwise, run the given file. *)
    else
       let infile = try In_channel.create Sys.argv.(1)
                    with e -> print_exn e; exit 1 in
-      begin
-         try
-            run_program infile;
-            In_channel.close infile;
-            exit 0
-         with e -> print_exn e;
-                   In_channel.close infile;
-                   exit 1
-      end
+      try
+         run_program infile;
+         In_channel.close infile;
+         exit 0
+      with e -> print_exn e;
+                In_channel.close infile;
+                exit 1
