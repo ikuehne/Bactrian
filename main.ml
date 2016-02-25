@@ -106,9 +106,11 @@ let repl_loop () =
    print_endline welcome_message;
    loop Primitives.initial
 
+
 (*
  * Entry point of the interpreter.
  *)
+
 let () = 
    (* Given no arguments, start a REPL session. *)
    if Array.length Sys.argv = 1 then repl_loop ()
