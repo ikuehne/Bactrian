@@ -62,6 +62,9 @@ val lookup : t -> string -> value option
     This can bind a new name or rebind it if it's already bound. *)
 val add : t -> string -> value -> unit
 
-(** Add lists of names and values to an environment.
-    This is just for convenience. *)
+(** Add lists of names and values to an environment. *)
 val add_all : t -> string list -> value list -> unit
+
+(** Take an AST, an environment in which to evaluate it, and produce either a
+    value or a list of errors. *)
+val eval : Ast.t -> t -> (value, Errors.t list) Result.t

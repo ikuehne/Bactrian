@@ -35,7 +35,7 @@ let green s = "\027[32m" ^ s ^ "\027[0m"
  * Returns (). *)
 let execute_expression env = function
    | None       -> ()
-   | Some sexpr -> let value = Eval.eval (Ast.ast_of_sexpr sexpr) env in
+   | Some sexpr -> let value = Env.eval (Ast.ast_of_sexpr sexpr) env in
                    match value with
                    | Ok value ->
                       print_string (blue "->> ");
@@ -56,7 +56,7 @@ let load_program env infile =
    Sequence.iter (Parser.stream_from_channel infile)
       ~f:(fun sexpr ->
          let expr = Ast.ast_of_sexpr sexpr in
-         ignore_val (Eval.eval expr env))
+         ignore_val (Env.eval expr env))
 
 (* Create a new environment and load primitives and standard functions into it.
  *)
@@ -72,7 +72,7 @@ let run_program infile =
    Sequence.iter (Parser.stream_from_channel infile)
       ~f:(fun sexpr ->
          let expr = Ast.ast_of_sexpr sexpr in
-         let s = Eval.eval expr env in
+         let s = Env.eval expr env in
          match s with 
             | Error es -> List.iter es ~f:Errors.print;
                           flush stderr
