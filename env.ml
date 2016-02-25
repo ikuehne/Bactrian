@@ -23,7 +23,7 @@ open Errors
 open Core.Std
 
 (* Default starting size for an environment. *)
-let env_size = 2
+let env_size = 20
 
 type value = 
    | Val_unit
@@ -146,7 +146,7 @@ let rec eval_checked ast env =
             | x -> raise (Type_Error ("ID",
                                       type_of_value x))
          end
-      | Check_ast.Lambda l -> Val_lambda (function_of_lambda l)
+      | Check_ast.Lambda l -> Val_lambda (function_of_lambda l env)
       | Check_ast.Apply (f, args) ->
          (* Evaluate all the arguments. *)
          let operands = List.map ~f:(fun x -> eval_checked x env) args in
@@ -160,27 +160,28 @@ let rec eval_checked ast env =
                                          ^ "cannot apply."))
          end
       | Check_ast.Quote s -> quote_to_list s
-and function_of_lambda {Check_ast.args; var_arg; code} env arguments =
-   let rec eval_lambda env = function
+and function_of_lambda {Check_ast.args; var_arg; code} env =
+   let closure = String.Table.create () ~size:env_size :: env in
+   let rec eval_lambda = function
       | [] -> Val_unit
-      | [x] -> eval_checked x env
-      | x :: xs -> ignore (eval_checked x env);
-                   eval_lambda env xs in
-   let new_env = make (Some env) in
-   begin
-      match var_arg with
-      | None -> begin
-                   try
-                      add_all new_env args arguments;
-                  with Invalid_argument _ ->
-                     raise (Invalid_Args ("<lambda expression>",
-                                          List.length args,
-                                          List.length arguments))
-                end
-      | Some args -> let arg_list = arguments |> cons_of_list in
-                     add new_env args arg_list;
-   end;
-   eval_lambda new_env code
+      | [x] -> eval_checked x closure
+      | x :: xs -> ignore (eval_checked x closure);
+                   eval_lambda xs in
+   fun _ arguments ->
+      begin
+         match var_arg with
+         | None -> begin
+                      try
+                         add_all closure args arguments;
+                      with Invalid_argument _ ->
+                          raise (Invalid_Args ("<lambda expression>",
+                                               List.length args,
+                                               List.length arguments))
+                   end
+         | Some args -> let arg_list = cons_of_list arguments in
+                        add closure args arg_list;
+      end;
+      eval_lambda code
 
 
 let eval ast env =
