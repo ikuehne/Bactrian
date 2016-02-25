@@ -118,28 +118,14 @@ let () =
          repl_loop ()
       end
    else
-      let infile = In_channel.create Sys.argv.(1) in
-         begin
-            try
-               run_program infile
-            with e -> begin
-               match e with
-                  | Failure f ->
-                       Printf.fprintf stderr "%s %s\n" (red "Error: ") f
-                  | Syntax_Error s -> 
-                       Printf.fprintf stderr "%s %s\n" (red "Syntax Error: ") s
-                  | Name_Error e ->
-                       Printf.fprintf stderr "%s %s\n" (red "Name Error: Undefined name: ") e
-                  | Invalid_Args (f, e, r) ->
-                       let plural = if e = 1 then ""
-                                             else "s" in
-                       Printf.fprintf stderr "%s Expected %d argument%s to %s; got %d.\n"
-                                             (red "Argument Error: ")
-                                             e plural f r
-                  | e -> raise e
-               end;
-               In_channel.close infile;
-               exit 1
-         end;
-         In_channel.close infile;
-         exit 0
+      let infile = try In_channel.create Sys.argv.(1)
+                   with e -> print_exn e; exit 1 in
+      begin
+         try
+            run_program infile;
+            In_channel.close infile;
+            exit 0
+         with e -> print_exn e;
+                   In_channel.close infile;
+                   exit 1
+      end

@@ -98,5 +98,5 @@ val throw : t -> 'a
 (** Print an error to stderr.  *)
 val print : t -> unit
 
-(** Convert an error to a string, intended for unit testing. *)
-val to_string : t -> string
+(** Print an exception to stderr. *)
+val print_exn : Exn.t -> unit

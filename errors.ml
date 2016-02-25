@@ -62,3 +62,21 @@ let print = function
      Printf.fprintf stderr "%s Expected %d argument%s to %s; got %d.\n"
                            (red "Argument Error: ")
                            e plural f r
+
+let print_exn = function
+   | Failure f ->
+        Printf.fprintf stderr "%s %s\n" (red "Error: ") f
+   | Syntax_Error s -> 
+        Printf.fprintf stderr "%s %s\n" (red "Syntax Error: ") s
+   | Name_Error e ->
+        Printf.fprintf stderr "%s %s\n" (red "Name Error: Undefined name: ") e
+   | Invalid_Args (f, e, r) ->
+        let plural = if e = 1 then ""
+                              else "s" in
+        Printf.fprintf stderr "%s Expected %d argument%s to %s; got %d.\n"
+                              (red "Argument Error: ")
+                              e plural f r
+   | Sys_error e ->
+         Printf.fprintf stderr "%s: %s.\n" (red "System error: ") e
+   | e -> raise e
+
