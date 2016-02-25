@@ -36,9 +36,13 @@ module T = struct
        | ID     of string
        | Define of (string * t, Errors.t) Result.t
        | If     of t * t * t
-       | Lambda of (string list * string option * t list, Errors.t) Result.t
+       | Lambda of (lambda, Errors.t) Result.t
        | Apply  of (t * t list, Errors.t) Result.t
-       | Quote  of S.t with sexp
+       | Quote  of S.t
+    and lambda = { args:    string list;
+                   var_arg: string option;
+                   code:    t list } with sexp
+
 end
 include T
 include Serial.Serialized(T)
@@ -78,23 +82,27 @@ let rec ast_of_if = function
 
 (* Create an AST from an s-expression representing a lambda. *)
 and ast_of_lambda = function
-   | (S.Atom (Atom.ID args)) :: (_ :: _ as body) ->
-      let body = List.map ~f:ast_of_sexpr body in
-      Lambda (Ok ([], Some args, body))
+   | (S.Atom (Atom.ID arg)) :: (_ :: _ as body) ->
+      let code   = List.map ~f:ast_of_sexpr body in
+      let var_arg = Some arg in
+      let lambda = {args=[]; var_arg; code} in
+      Lambda (Ok lambda)
    | args :: (_ :: _ as body) ->
       begin
          match check_list args with
          | Ok args ->
-            let ids  = List.map ~f:check_id     args in
-            let body = List.map ~f:ast_of_sexpr body in
+            let args = List.map ~f:check_id     args in
+            let code = List.map ~f:ast_of_sexpr body in
             begin
-               match List.filter ~f:is_error ids with
-               | []      -> Lambda (Ok (List.map ~f:ok_exn ids, None, body))
+               match List.filter ~f:is_error args with
+               | []      -> let args   = List.map ~f:ok_exn args in
+                            let lambda = {args; var_arg=None; code} in
+                            Lambda (Ok lambda)
                | e :: _ ->
                   begin
                      match e with
-                     | Error error -> Lambda (Error error)
-                     | _           -> assert false
+                     | Error e -> Lambda (Error e)
+                     | _       -> assert false
                   end
             end
          | Error e -> Lambda (Error e)
@@ -171,9 +179,9 @@ and ast_of_quote = function
  * an Error.Type _ if it is not. *)
 and check_f f = 
    match ast_of_sexpr f with
-   | (ID     _) as id     -> Ok id
-   | (Lambda _) as lambda -> Ok lambda
-   | (Apply  _) as apply  -> Ok apply
+   | (ID     _) as id    -> Ok id
+   | (Lambda _) as l     -> Ok l
+   | (Apply  _) as apply -> Ok apply
    | other -> Error (Errors.Type ("Lambda", get_type other))
 
 (* Generate an abstract syntax tree from an s-expression. *)

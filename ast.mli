@@ -24,24 +24,25 @@
  *)
 
 open Core.Std
+module S = Sexpr
 
 (** Type of AST expressions. *)
 type t =
    | Unit
    | Bool   of bool
-   | Int    of (int, Errors.t)  Result.t
+   | Int    of (int,  Errors.t)  Result.t
    | Float  of float
    | Char   of (char, Errors.t) Result.t
    | String of string
    | ID     of string
    | Define of (string * t, Errors.t) Result.t
    | If     of t * t * t
-   (* A lambda is represented by a tuple containing: a list of argument names,
-    * an optional name for the rest of the arguments (for variadic functions)
-    * and a list of ASTs representing the body of the lambda. *)
-   | Lambda of (string list * string option * t list, Errors.t) Result.t
+   | Lambda of (lambda, Errors.t) Result.t
    | Apply  of (t * t list, Errors.t) Result.t
-   | Quote  of Sexpr.t
+   | Quote  of S.t
+and lambda = { args:    string list;
+               var_arg: string option;
+               code:    t list }
 
 (** Make an s-expression from an AST. *)
 val to_sexp : t -> Sexp.t

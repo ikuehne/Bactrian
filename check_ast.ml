@@ -77,12 +77,12 @@ let rec check = function
             | (Error _) as x -> x
             | _ -> assert false
          end
-   | Ast.Lambda (Ok (ids, args, asts)) ->
-        let checked = List.map ~f:check asts in
+   | Ast.Lambda (Ok {args; var_arg; code}) ->
+        let checked = List.map ~f:check code in
         begin
            match propagate checked with
-           | Ok asts ->
-                 Ok (Lambda (ids, args, asts))
+           | Ok code ->
+                 Ok (Lambda (args, var_arg, code))
            | (Error _) as x -> x
         end
    | Ast.Lambda (Error e) -> Error [e]
