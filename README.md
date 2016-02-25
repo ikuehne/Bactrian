@@ -15,7 +15,7 @@ Usage
 
 After cloning the repository, simply type:
 
-$ make
+    $ make
 
 to compile.  OCaml, ocamllex, ocamlyacc, and the Core standard library are
 required to build Bactrian.  The resulting executable will be called "bactrian".
