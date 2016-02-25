@@ -24,7 +24,6 @@
  *)
 
 open Core.Std
-module S = Sexpr
 
 (** Type of AST expressions. *)
 type t =
@@ -39,7 +38,7 @@ type t =
    | If     of t * t * t
    | Lambda of (lambda, Errors.t) Result.t
    | Apply  of (t * t list, Errors.t) Result.t
-   | Quote  of S.t
+   | Quote  of Sexpr.t
 and lambda = { args:    string list;
                var_arg: string option;
                code:    t list }
