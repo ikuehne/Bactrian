@@ -75,8 +75,8 @@ let rec eval_checked ast env =
             | x -> raise (Type_Error ("ID",
                                       type_of_value x))
          end
-      | Check_ast.Lambda (ids, args, exprs) -> 
-         Val_lambda (env, ids, args, exprs)
+      | Check_ast.Lambda l -> 
+         Val_lambda (env, l.args, l.var_arg, l.code)
       | Check_ast.Apply (f, args) ->
          (* Evaluate all the arguments. *)
          let operands = List.map ~f:(fun x -> eval_checked x env) args in

@@ -33,9 +33,12 @@ type t =
    | ID     of string
    | Define of string * t
    | If     of t * t * t
-   | Lambda of string list * string option * t list
+   | Lambda of lambda
    | Apply  of t * t list
    | Quote  of Sexpr.t
+and lambda = { args:    string list;
+               var_arg: string option;
+               code:    t list }
 
 (* Propagate errors when checking a list of checked asts. If a single list of
  * errors is found, start accumulating the errors into a Error list; 
@@ -77,12 +80,12 @@ let rec check = function
             | (Error _) as x -> x
             | _ -> assert false
          end
-   | Ast.Lambda (Ok {args; var_arg; code}) ->
-        let checked = List.map ~f:check code in
+   | Ast.Lambda (Ok l) ->
+        let checked = List.map ~f:check l.code in
         begin
            match propagate checked with
            | Ok code ->
-                 Ok (Lambda (args, var_arg, code))
+                 Ok (Lambda {args=l.args; var_arg=l.var_arg; code})
            | (Error _) as x -> x
         end
    | Ast.Lambda (Error e) -> Error [e]

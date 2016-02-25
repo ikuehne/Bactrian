@@ -36,9 +36,12 @@ type t =
    | ID     of string
    | Define of string * t
    | If     of t * t * t
-   | Lambda of string list * string option * t list
+   | Lambda of lambda
    | Apply  of t * t list
    | Quote  of Sexpr.t
+and lambda = { args:    string list;
+               var_arg: string option;
+               code:    t list }
 
 (** Take an AST potentially with error types scattered throughout and return 
     either an AST guaranteed to have no errors, or a list of errors found. *)
