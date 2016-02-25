@@ -141,6 +141,7 @@ let escape str =
 (* Print a string. *)
 let print_string _ = function
    | [Env.Val_string s] -> print_string @@ escape s;
+                           Out_channel.flush stdout;
                            Env.Val_unit
    | [v]                -> raise (Type_Error ("String", Env.type_of_value v))
    | l                  -> raise (Invalid_Args ("print-string",
@@ -223,7 +224,7 @@ let eval _ l =(* function
    | l ->*) raise (Invalid_Args ("eval", 1, List.length l))
 
 (* Load the primitive functions into an environment, 
-   along with their names. *)
+ * along with their names. *)
 let load env =
    let ops = [ (add, "+.")
              ; (sub, "-")
@@ -249,3 +250,22 @@ let load env =
              ; (eval, "eval") ] in
    List.iter ~f:(fun (op, name) -> Env.add env name (Env.Val_lambda op)) ops;
    Env.add env "nil" nil
+
+let ignore_val = function
+   | Error es -> List.iter es ~f:Errors.print;
+                 flush stderr
+   | _ -> ()
+
+(* Execute the given program file (given as a channel), loading values it
+ * produces in the given environment. *)
+let load_program env infile =
+   Sequence.iter (Parser.stream_from_channel infile)
+      ~f:(fun sexpr ->
+         let expr = Ast.ast_of_sexpr sexpr in
+         ignore_val (Env.eval expr env))
+
+let initial =
+   let i = Env.make None in
+   load i;
+   load_program i (In_channel.create "runtime.bac");
+   i

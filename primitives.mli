@@ -30,5 +30,4 @@
     interpreter at runtime.
  *)
 
-(** Load all primitive functions into an environment. *)
-val load : Env.t -> unit
+val initial: Env.t

@@ -58,21 +58,12 @@ let load_program env infile =
          let expr = Ast.ast_of_sexpr sexpr in
          ignore_val (Env.eval expr env))
 
-(* Create a new environment and load primitives and standard functions into it.
- *)
-let make_env () =
-   let env = Env.make None in
-   Primitives.load env;
-   load_program env (In_channel.create "./runtime.bac");
-   env
-
 (* Run the program given in a fresh environment, and return nothing. *)
 let run_program infile = 
-   let env = make_env () in
    Sequence.iter (Parser.stream_from_channel infile)
       ~f:(fun sexpr ->
          let expr = Ast.ast_of_sexpr sexpr in
-         let s = Env.eval expr env in
+         let s = Env.eval expr Primitives.initial in
          match s with 
             | Error es -> List.iter es ~f:Errors.print;
                           flush stderr
@@ -107,8 +98,7 @@ let repl_loop () =
               flush stderr
       end;
       loop env in
-   let env = make_env () in
-   loop env
+   loop Primitives.initial
 
 (* Entry point of the interpreter. *)
 let () = 
