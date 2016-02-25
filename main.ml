@@ -1,5 +1,4 @@
-(* 
- * Copyright 2015 Ian Kuehne.
+(* * Copyright 2015 Ian Kuehne.
  *
  * Email: ikuehne@caltech.edu
  *
@@ -22,8 +21,6 @@
 open Errors
 open Core.Std
 
-(* Return a new string that will print red. *)
-let red s = "\027[31;1m" ^ s ^ "\027[0m"
 (* Return a new string that will print blue. *)
 let blue s = "\027[34m" ^ s ^ "\027[0m"
 (* Return a new string that will print green. *)
@@ -74,28 +71,9 @@ let repl_loop () =
    let rec loop env =
       print_string (green "=> ");
       flush stdout;
-      begin try execute_expression env (Parser.sexpr_from_channel stdin)
-      with Failure f ->
-              Printf.fprintf stderr "%s %s\n" (red "Error: ") f;
-              flush stderr
-         | Syntax_Error s ->
-              Printf.fprintf stderr "%s %s\n" (red "Syntax Error: ") s;
-              flush stderr
-         | Name_Error e ->
-              Printf.fprintf stderr "%s %s not bound.\n"
-                                    (red "Name Error: ") e;
-              flush stderr
-         | Invalid_Args (f, e, r) ->
-              let plural = if e = 1 then ""
-                                    else "s" in
-              Printf.fprintf stderr "%s Expected %d argument%s to %s; got %d.\n"
-                                    (red "Argument Error: ")
-                                    e plural f r;
-              flush stderr
-         | Type_Error (e, r) ->
-              Printf.fprintf stderr "%s Expected %s, got %s.\n"
-                                  (red "Type error: ") e r;
-              flush stderr
+      begin
+         try execute_expression env (Parser.sexpr_from_channel stdin)
+         with e -> print_exn e
       end;
       loop env in
    loop Primitives.initial

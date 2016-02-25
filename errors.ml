@@ -52,31 +52,42 @@ let throw = function
 let print = function
    | Literal s ->
       Printf.fprintf stderr "%s Invalid literal: %s.\n"
-                            (red "Literal error: ") s
+                            (red "Literal error: ") s;
+      flush stderr
    | Type (e, r) ->
       Printf.fprintf stderr "%s Expected %s, got %s.\n"
-                            (red "Type error: ") e r
+                            (red "Type error: ") e r;
+      flush stderr
    | Argument (f, e, r) -> 
       let plural = if e = 1 then ""
                             else "s" in
-     Printf.fprintf stderr "%s Expected %d argument%s to %s; got %d.\n"
-                           (red "Argument Error: ")
-                           e plural f r
+      Printf.fprintf stderr "%s Expected %d argument%s to %s; got %d.\n"
+                            (red "Argument Error: ")
+                            e plural f r;
+      flush stderr
 
 let print_exn = function
    | Failure f ->
-        Printf.fprintf stderr "%s %s\n" (red "Error: ") f
+        Printf.fprintf stderr "%s %s\n" (red "Error: ") f;
+        flush stderr
    | Syntax_Error s -> 
-        Printf.fprintf stderr "%s %s\n" (red "Syntax Error: ") s
+        Printf.fprintf stderr "%s %s\n" (red "Syntax Error: ") s;
+        flush stderr
    | Name_Error e ->
-        Printf.fprintf stderr "%s %s\n" (red "Name Error: Undefined name: ") e
+        Printf.fprintf stderr "%s Undefined name: %s\n" (red "Name Error: ") e;
+        flush stderr
+   | Type_Error (e, r) ->
+        Printf.fprintf stderr "%s Expected %s, got %s.\n"
+                              (red "Type Error: ") e r;
+        flush stderr
    | Invalid_Args (f, e, r) ->
         let plural = if e = 1 then ""
                               else "s" in
         Printf.fprintf stderr "%s Expected %d argument%s to %s; got %d.\n"
                               (red "Argument Error: ")
-                              e plural f r
+                              e plural f r;
+        flush stderr
    | Sys_error e ->
-         Printf.fprintf stderr "%s: %s.\n" (red "System error: ") e
+         Printf.fprintf stderr "%s %s.\n" (red "System error: ") e;
+         flush stderr
    | e -> raise e
-
