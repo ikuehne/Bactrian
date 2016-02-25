@@ -23,7 +23,8 @@ open Env
 open Errors
 open Core.Std
 
-let cons_of_list = List.fold_right ~init:Val_unit ~f:(fun x y -> Val_cons (x, y))
+let cons_of_list = List.fold_right ~init:Val_unit
+                                   ~f:(fun x y -> Val_cons (x, y))
 
 let rec quote_to_list =
    let eval_atom = function
@@ -35,7 +36,7 @@ let rec quote_to_list =
       | Atom.Char (Ok c)    -> Val_char c
       | Atom.Char (Error e) -> Errors.throw e
       | Atom.String s       -> Val_string s
-      | Atom.ID s           -> Val_string s in
+      | Atom.ID s           -> Val_id s in
 
    function
    | Sexpr.Atom a  -> eval_atom a
