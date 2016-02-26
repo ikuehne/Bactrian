@@ -165,13 +165,13 @@ let rec eval_checked ast env =
          end
       | Check_ast.Quote s -> quote_to_list s
 and function_of_lambda {Check_ast.args; var_arg; code} env =
-   let closure = String.Table.create () ~size:env_size :: env in
-   let rec eval_lambda = function
+   let rec eval_lambda closure = function
       | [] -> Val_unit
       | [x] -> eval_checked x closure
       | x :: xs -> ignore (eval_checked x closure);
-                   eval_lambda xs in
+                   eval_lambda closure xs in
    fun _ arguments ->
+      let closure = String.Table.create () ~size:env_size :: env in
       begin
          match var_arg with
          | None -> begin
@@ -185,7 +185,7 @@ and function_of_lambda {Check_ast.args; var_arg; code} env =
          | Some args -> let arg_list = cons_of_list arguments in
                         add closure args arg_list;
       end;
-      eval_lambda code
+      eval_lambda closure code
 
 
 let eval ast env =
