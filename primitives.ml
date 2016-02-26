@@ -209,10 +209,26 @@ let list_to_string _ =
             |> fun x -> Env.Val_string x
       | l -> raise (Invalid_Args ("list->string", 1, List.length l))
 
+let rec sexpr_of_cons c =
+   let lst = list_of_cons c in
+   let rec to_sexpr = function
+   | Env.Val_unit -> Sexpr.Atom (Atom.Unit)
+   | Env.Val_bool b -> Sexpr.Atom (Atom.Bool b)
+   | Env.Val_int i -> Sexpr.Atom (Atom.Int (Result.Ok i))
+   | Env.Val_float f -> Sexpr.Atom (Atom.Float f)
+   | Env.Val_char c -> Sexpr.Atom (Atom.Char (Result.Ok c))
+   | Env.Val_string s -> Sexpr.Atom (Atom.String s)
+   | Env.Val_id i -> Sexpr.Atom (Atom.ID i)
+   | Env.Val_cons _ as c -> let lst2 = list_of_cons c in
+                              Sexpr.List (List.map ~f:to_sexpr lst2)
+   | Env.Val_nil -> Sexpr.List [] in
+   Sexpr.List (List.map ~f:to_sexpr lst)
+
 (* Evaluate a list or quoted expression. *)
-let eval _ l =(* function
-   | [Env.Val_quote l] ->
+let eval env = function
+   | [l] ->
       let result = l
+                |> sexpr_of_cons
                 |> Ast.ast_of_sexpr
                 |> fun a -> Env.eval a env in
       begin
@@ -220,7 +236,7 @@ let eval _ l =(* function
          | Ok x -> x
          | Error (e::es) -> Errors.throw e
       end
-   | l ->*) raise (Invalid_Args ("eval", 1, List.length l))
+   | l -> raise (Invalid_Args ("eval", 1, List.length l))
 
 (* Load the primitive functions into an environment, 
  * along with their names. *)
