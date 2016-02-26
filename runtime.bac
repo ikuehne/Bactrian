@@ -40,9 +40,6 @@
 ; Return a well-formed list of all arguments.
 (define list (lambda args args))
 
-; Alias for the unit value.
-(define nil '())
-
 ; Check if a value is nil.
 (define (nil? x) (= nil x))
 
