@@ -8,9 +8,12 @@
 (define addthree (makeadder 3))
 (print (= (addthree 3) 6))
 
-(define scopetester
-  (lambda (n)
-    (print (= ((lambda (n) (+. n 12)) 24) 36))
-    (print (= n 101))))
+(define (scopetester n i)
+  (if (= i 0)
+    1
+    (seq
+      (print (= ((lambda (n) (+. n 12)) 24) 36))
+      (print (= n i))
+      (scopetester (- n 1) (- i 1)))))
 
-(scopetester 101)
+(scopetester 101 101)
