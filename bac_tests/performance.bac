@@ -3,11 +3,11 @@
 (define (recursion-test n)
   (if (= n 0)
       0
-      (+ n (recursion-test (- n 1)))))
+      (+. n (recursion-test (- n 1)))))
 
-(define depth 10000)
+(define depth 55000)
 
-(print (recursion-test 55000))
+(print (recursion-test depth))
 
 (print-string "\n")
 
@@ -15,7 +15,7 @@
 
 (define (ackermann m n)
   (if (= m 0) 
-      (+ n 1)
+      (+. n 1)
       (if (= n 0)
           (ackermann (- m 1)
                      1)
@@ -23,5 +23,30 @@
                      (ackermann m (- n 1))))))
 
 (print (ackermann 3 4))
+
+(print-string "\n")
+
+(print-string "Testing list performance...\n")
+
+(define (range n)
+   (define
+     (aux n)
+     (if (= n 0)
+         '()
+         (cons n (aux (- n 1)))))
+   (reverse (aux n)))
+
+(print (foldr +. 0 (range 55000)))
+
+(print-string "\n")
+
+(print-string "Testing TCO...\n")
+
+(define (tco-test n)
+  (if (= n 0)
+      0
+      (tco-test (- n 1))))
+
+(print (tco-test 10000000))
 
 (print-string "\n")
