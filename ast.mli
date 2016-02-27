@@ -36,6 +36,7 @@ type t =
    | ID     of string
    | Define of (string * t, Errors.t) Result.t
    | If     of t * t * t
+   | Macro  of (lambda, Errors.t) Result.t
    | Lambda of (lambda, Errors.t) Result.t
    | Apply  of (t * t list, Errors.t) Result.t
    | Quote  of Sexpr.t

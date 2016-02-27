@@ -36,6 +36,7 @@ module T = struct
        | ID     of string
        | Define of (string * t, Errors.t) Result.t
        | If     of t * t * t
+       | Macro  of (lambda, Errors.t) Result.t
        | Lambda of (lambda, Errors.t) Result.t
        | Apply  of (t * t list, Errors.t) Result.t
        | Quote  of S.t
@@ -58,6 +59,7 @@ let get_type = function
    | Define _ -> "Define"
    | If     _ -> "If"
    | Lambda _ -> "Function"
+   | Macro  _ -> "Macro"
    | Apply  _ -> "Apply"
    | Quote  _ -> "Quoted Expression"
 
@@ -108,6 +110,12 @@ and ast_of_lambda = function
          | Error e -> Lambda (Error e)
       end
    | lst -> Lambda (Error (Argument ("lambda", 2, (List.length lst))))
+
+(* Create a new macro. *)
+and ast_of_macro x =
+   match ast_of_lambda x with
+   | Lambda f -> Macro f
+   | _        -> assert false
 
 (* Create an AST from an s-expression representing a function 
  * application. *)
@@ -169,6 +177,7 @@ and ast_of_list = function
    | [S.Atom atom] -> ast_of_atom atom
    | (S.Atom (Atom.ID "define")) :: def  -> ast_of_def def
    | (S.Atom (Atom.ID "if")) :: if_then  -> ast_of_if if_then
+   | (S.Atom (Atom.ID "macro")) :: body -> ast_of_macro body
    | (S.Atom (Atom.ID "lambda")) :: body -> ast_of_lambda body
    | other -> ast_of_apply other
 
@@ -181,6 +190,7 @@ and check_f f =
    match ast_of_sexpr f with
    | (ID     _) as id    -> Ok id
    | (Lambda _) as l     -> Ok l
+   | (Macro _)  as m     -> Ok m
    | (Apply  _) as apply -> Ok apply
    | other -> Error (Errors.Type ("Lambda", get_type other))
 
