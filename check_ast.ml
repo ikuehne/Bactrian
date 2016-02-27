@@ -86,7 +86,7 @@ let rec check = function
         begin
            match propagate checked with
            | Ok code ->
-                 Ok (Lambda {args=m.args; var_arg=m.var_arg; code})
+                 Ok (Macro {args=m.args; var_arg=m.var_arg; code})
            | (Error _) as x -> x
         end
    | Ast.Macro (Error e) -> Error [e]
