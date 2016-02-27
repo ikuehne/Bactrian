@@ -23,6 +23,22 @@
 
 ;; Control structures.
 
+; Local bindings with `let`.
+(define let
+  (macro exprs
+         ((lambda (bindings body)
+                  ((lambda (name binding)
+                     (list (cons 'lambda (cons (list name) body)) binding))
+                         (car bindings) (car (cdr bindings))))
+                      (car exprs) (cdr exprs))))
+
+(define testmacro
+  (macro x
+         (let (asfunction (cons 'lambda x))
+         (let (asmacro (cons 'macro x))
+           (lambda (x) (print (asfunction x)) (asmacro x))))))
+
+
 ; Composition operator.
 (define (. f g)
   (lambda (x)
@@ -74,3 +90,13 @@
 ; '+.' and '-.'.
 (define + (lambda args (fold +. 0 args)))
 (define * (lambda args (fold *. 1 args)))
+
+
+;(define testlet
+;  (testmacro exprs
+;         ((lambda (bindings body)
+;                  ((lambda (name binding)
+;                     (list (cons 'lambda (cons (list name) body)) binding))
+;                         (car bindings) (car (cdr bindings))))
+;                      (car exprs) (cdr exprs))))
+
