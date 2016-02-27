@@ -131,25 +131,33 @@ let rec sexpr_of_cons c =
    let lst = list_of_cons c in
    Sexpr.List (List.map ~f:to_sexpr lst)
 
-let rec quote_to_list =
-   let eval_atom = function
-      | Atom.Unit           -> Val_unit
-      | Atom.Bool b         -> Val_bool b
-      | Atom.Int (Ok i)     -> Val_int i
-      | Atom.Int (Error e)  -> Errors.throw e
-      | Atom.Float f        -> Val_float f
-      | Atom.Char (Ok c)    -> Val_char c
-      | Atom.Char (Error e) -> Errors.throw e
-      | Atom.String s       -> Val_string s
-      | Atom.ID s           -> Val_id s in
+let eval_atom = function
+   | Atom.Unit           -> Val_unit
+   | Atom.Bool b         -> Val_bool b
+   | Atom.Int (Ok i)     -> Val_int i
+   | Atom.Int (Error e)  -> Errors.throw e
+   | Atom.Float f        -> Val_float f
+   | Atom.Char (Ok c)    -> Val_char c
+   | Atom.Char (Error e) -> Errors.throw e
+   | Atom.String s       -> Val_string s
+   | Atom.ID s           -> Val_id s
 
-   function
-   | Sexpr.Atom a  -> eval_atom a
-   | Sexpr.List l  -> cons_of_list (List.map ~f:quote_to_list l)
-   | Sexpr.Quote q -> quote_to_list q
+let rec quote_to_list = function
+   | Sexpr.Atom a    -> eval_atom a
+   | Sexpr.List l    -> cons_of_list (List.map ~f:quote_to_list l)
+   | Sexpr.Quote q   -> quote_to_list q
+   | Sexpr.Quasi q   -> Val_cons (Val_id "quasiquote", quote_to_list q)
+   | Sexpr.Unquote u -> Val_cons (Val_id "unquote",    quote_to_list u)
 
 
 let rec eval_checked ast env =
+
+   let rec quasi_to_list = function
+      | Sexpr.Atom a    -> eval_atom a
+      | Sexpr.List l    -> cons_of_list (List.map ~f:quasi_to_list l)
+      | Sexpr.Quote q   -> quote_to_list q
+      | Sexpr.Quasi q   -> quasi_to_list q
+      | Sexpr.Unquote u -> eval_sexpr env u in
 
    let handle_lookup name = function
       | None   -> raise (Name_Error name)
@@ -205,7 +213,9 @@ let rec eval_checked ast env =
                                          ^ " is not a function; "
                                          ^ "cannot apply."))
          end
-      | Check_ast.Quote s -> quote_to_list s
+      | Check_ast.Quote q   -> quote_to_list q
+      | Check_ast.Quasi q   -> quasi_to_list q
+      | Check_ast.Unquote u -> eval_sexpr env u
 and function_of_lambda {Check_ast.args; var_arg; code} env =
    let rec eval_lambda closure = function
       | [] -> Val_unit
@@ -239,6 +249,14 @@ and function_of_macro lambda env =
       match checked with
       | Ok ast  -> ast
       | Error (e :: _) -> throw e
+
+and eval_sexpr env sexpr = 
+  let checked = sexpr
+             |> Ast.ast_of_sexpr
+             |> Check_ast.check in
+  match checked with
+  | Ok ast  -> eval_checked ast env
+  | Error (e :: _) -> throw e
 
 
 let eval ast env =
