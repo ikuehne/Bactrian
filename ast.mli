@@ -28,18 +28,20 @@ open Core.Std
 (** Type of AST expressions. *)
 type t =
    | Unit
-   | Bool   of bool
-   | Int    of (int,  Errors.t)  Result.t
-   | Float  of float
-   | Char   of (char, Errors.t) Result.t
-   | String of string
-   | ID     of string
-   | Define of (string * t, Errors.t) Result.t
-   | If     of t * t * t
-   | Macro  of (lambda, Errors.t) Result.t
-   | Lambda of (lambda, Errors.t) Result.t
-   | Apply  of (t * Sexpr.t list, Errors.t) Result.t
-   | Quote  of Sexpr.t
+   | Bool     of bool
+   | Int      of (int,  Errors.t)  Result.t
+   | Float    of float
+   | Char     of (char, Errors.t) Result.t
+   | String   of string
+   | ID       of string
+   | Define   of (string * t, Errors.t) Result.t
+   | If       of t * t * t
+   | Macro    of (lambda, Errors.t) Result.t
+   | Lambda   of (lambda, Errors.t) Result.t
+   | Apply    of (t * Sexpr.t list, Errors.t) Result.t
+   | Quote    of Sexpr.t
+   | Quasi    of Sexpr.t
+   | Unquote  of Sexpr.t
 and lambda = { args:    string list;
                var_arg: string option;
                code:    t list }

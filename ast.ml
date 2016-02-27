@@ -28,18 +28,20 @@ module T = struct
     (* Type of Bactrian expressions, representing the abstract syntax tree. *)
     type t =
        | Unit
-       | Bool   of bool
-       | Int    of (int,  Errors.t)  Result.t
-       | Float  of float
-       | Char   of (char, Errors.t) Result.t
-       | String of string
-       | ID     of string
-       | Define of (string * t, Errors.t) Result.t
-       | If     of t * t * t
-       | Macro  of (lambda, Errors.t) Result.t
-       | Lambda of (lambda, Errors.t) Result.t
-       | Apply  of (t * Sexpr.t list, Errors.t) Result.t
-       | Quote  of S.t
+       | Bool     of bool
+       | Int      of (int,  Errors.t)  Result.t
+       | Float    of float
+       | Char     of (char, Errors.t) Result.t
+       | String   of string
+       | ID       of string
+       | Define   of (string * t, Errors.t) Result.t
+       | If       of t * t * t
+       | Macro    of (lambda, Errors.t) Result.t
+       | Lambda   of (lambda, Errors.t) Result.t
+       | Apply    of (t * Sexpr.t list, Errors.t) Result.t
+       | Quote    of S.t
+       | Quasi    of S.t
+       | Unquote  of S.t
     and lambda = { args:    string list;
                    var_arg: string option;
                    code:    t list } with sexp
@@ -50,18 +52,20 @@ include Serial.Serialized(T)
 
 let get_type = function
    | Unit     -> "Unit"
-   | Bool   _ -> "Bool"
-   | Int    _ -> "Int"
-   | Float  _ -> "Float"
-   | Char   _ -> "Char"
-   | String _ -> "String"
-   | ID     _ -> "ID"
-   | Define _ -> "Define"
-   | If     _ -> "If"
-   | Lambda _ -> "Function"
-   | Macro  _ -> "Macro"
-   | Apply  _ -> "Apply"
-   | Quote  _ -> "Quoted Expression"
+   | Bool     _ -> "Bool"
+   | Int      _ -> "Int"
+   | Float    _ -> "Float"
+   | Char     _ -> "Char"
+   | String   _ -> "String"
+   | ID       _ -> "ID"
+   | Define   _ -> "Define"
+   | If       _ -> "If"
+   | Lambda   _ -> "Function"
+   | Macro    _ -> "Macro"
+   | Apply    _ -> "Apply"
+   | Quote    _ -> "Quoted Expression"
+   | Quasi    _ -> "Quasiquoted Expression"
+   | Unquote  _ -> "Escaped Expression"
 
 let ok_exn = function
    | Ok x    -> x
@@ -177,12 +181,15 @@ and ast_of_list = function
    | [S.Atom atom] -> ast_of_atom atom
    | (S.Atom (Atom.ID "define")) :: def  -> ast_of_def def
    | (S.Atom (Atom.ID "if")) :: if_then  -> ast_of_if if_then
-   | (S.Atom (Atom.ID "macro")) :: body -> ast_of_macro body
+   | (S.Atom (Atom.ID "macro")) :: body  -> ast_of_macro body
    | (S.Atom (Atom.ID "lambda")) :: body -> ast_of_lambda body
    | other -> ast_of_apply other
 
-and ast_of_quote = function
-   | s -> Quote s
+and ast_of_quote s = Quote s
+
+and ast_of_quasi s = Quasi s
+
+and ast_of_unquote s = Unquote s
 
 (* Check that an s-expression could be a function, returning a Result.t with
  * an Error.Type _ if it is not. *)
@@ -196,6 +203,8 @@ and check_f f =
 
 (* Generate an abstract syntax tree from an s-expression. *)
 and ast_of_sexpr = function
-   | S.Atom atom -> ast_of_atom atom
-   | S.List lst  -> ast_of_list lst
-   | S.Quote q   -> ast_of_quote q
+   | S.Atom atom -> ast_of_atom    atom
+   | S.List lst  -> ast_of_list    lst
+   | S.Quote q   -> ast_of_quote   q
+   | S.Quasi q   -> ast_of_quasi   q
+   | S.Unquote u -> ast_of_unquote u
