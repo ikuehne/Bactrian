@@ -31,9 +31,11 @@ open Core.Std
 
 (** Type of all S-expressions. *)
 type t =
-   | Atom of Atom.t
-   | List of t list
-   | Quote of t
+   | Atom       of Atom.t
+   | List       of t list
+   | Quote      of t
+   | Quasi      of t
+   | Unquote    of t
 
 (** Make an s-expression with an s-expression. *)
 val to_sexp : t -> Sexp.t

@@ -22,19 +22,25 @@
 open Core.Std
 
 type t =
-   | Atom of Atom.t
-   | List of t list
-   | Quote of t
+   | Atom        of Atom.t
+   | List        of t list
+   | Quote       of t
+   | Quasi  of t
+   | Unquote     of t
 
 let rec to_sexp = function
    | Atom a  -> Sexp.List [Sexp.Atom "Atom"; Atom.to_sexp a]
    | List xs -> Sexp.List [Sexp.Atom "List"; Sexp.List (List.map ~f:to_sexp xs)]
    | Quote t -> Sexp.List [Sexp.Atom "Quote"; to_sexp t]
+   | Quasi t -> Sexp.List [Sexp.Atom "Quasi"; to_sexp t]
+   | Unquote    t -> Sexp.List [Sexp.Atom "Unquote"; to_sexp t]
 
 let rec of_sexp = function
    | Sexp.List [Sexp.Atom "Atom"; s]           -> Atom (Atom.of_sexp s)
    | Sexp.List [Sexp.Atom "List"; Sexp.List l] -> List (List.map ~f:of_sexp l)
    | Sexp.List [Sexp.Atom "Quote"; s]          -> Quote (of_sexp s)
+   | Sexp.List [Sexp.Atom "Quasi"; s]     -> Quasi (of_sexp s)
+   | Sexp.List [Sexp.Atom "Unquote"; s]        -> Unquote (of_sexp s)
    | a -> raise (Sexplib.Conv.Of_sexp_error
                   (failwith "Error: Sexp.List needed.", a))
 
@@ -46,7 +52,9 @@ let t_of_sexp = of_sexp
 let sexp_of_t = to_sexp
 
 let rec recreate_input = function
-   | Atom a  -> Atom.recreate_input a
-   | List ss -> let f str sexpr = str ^ " " ^ (recreate_input sexpr) in
-                (List.fold_left ss ~init:"(" ~f) ^ ")"
-   | Quote q -> sprintf "(quote %s )" (recreate_input q)
+   | Atom a       -> Atom.recreate_input a
+   | List ss      -> let f str sexpr = str ^ " " ^ (recreate_input sexpr) in
+                     (List.fold_left ss ~init:"(" ~f) ^ ")"
+   | Quote q      -> sprintf "(quote %s )" (recreate_input q)
+   | Quasi q -> sprintf "(quasiquote %s )" (recreate_input q)
+   | Unquote q    -> sprintf "(unquote %s )" (recreate_input q)

@@ -58,12 +58,12 @@ parse:
 /* Parsing rule for quasiquoted S-Expressions. An S-Expression preceded by a
  * backtick. */
 quasi_sexpr:
-   | TOK_QUASI sexpr { Sexpr.Quote $2 }
+   | TOK_QUASI sexpr { Sexpr.Quasi $2 }
 
 /* Parsing rule for unquoted S-Expressions. An S-Expression preceded by a comma.
  */
 unquoted_sexpr:
-   | TOK_UNQUOTE sexpr { $2 }
+   | TOK_UNQUOTE sexpr { Sexpr.Unquote $2 }
 
 /* Parsing rule for quoted S-Expressions. An S-Expression preceded by a quote.
 */
@@ -75,9 +75,9 @@ quoted_sexpr:
 sexpr:
   | atom           { Sexpr.Atom $1 }
   | slist          { Sexpr.List $1 }
-  | quoted_sexpr   { $1 }
-  | unquoted_sexpr { $1 }
-  | quasi_sexpr    { $1}
+  | quoted_sexpr   { $1            }
+  | unquoted_sexpr { $1            }
+  | quasi_sexpr    { $1            }
 
 /* Match atoms and package them in an Atom.t. */
 atom:  
