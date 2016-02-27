@@ -23,13 +23,12 @@
 
 ;; Control structures.
 
-; Local bindings with `let`.
 (define let
   (macro exprs
          ((lambda (bindings body)
                   ((lambda (name binding)
-                     (list (cons 'lambda (cons (list name) body)) binding))
-                         (car bindings) (car (cdr bindings))))
+                     `((lambda (,name) ,body) ,binding))
+                         (fst bindings) (snd bindings)))
                       (car exprs) (cdr exprs))))
 
 (define testmacro
@@ -85,6 +84,11 @@
       (cons (f a) b_list))
     '()
     lst))
+
+; Accessing elements of a list.
+(define fst car)
+(define snd (. car cdr))
+(define thrd (. car (. cdr cdr)))
 
 ; Variadic '+' and '*' functions.  The faster binary operations are available as
 ; '+.' and '-.'.
