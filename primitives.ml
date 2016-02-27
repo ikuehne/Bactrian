@@ -157,17 +157,6 @@ let exit _ = function
                 end
    | l -> raise (Invalid_Args ("exit", 1, List.length l))
 
-(* List construction functions. *)
-let cons_of_list = List.fold_right ~init:Env.Val_nil
-                                   ~f:(fun x y -> Env.Val_cons (x, y))
-
-let rec list_of_cons = function
-   | Env.Val_cons (x1, x2) -> x1 :: (list_of_cons x2)
-   | Env.Val_nil           -> []
-   | other                 -> raise (Type_Error ("List",
-                                                 Env.type_of_value other)
-                                                                               )
-
 let cons _ = function
    | [v1; v2] -> Env.Val_cons (v1, v2)
    | l -> raise (Invalid_Args ("cons", 2, List.length l))
@@ -192,7 +181,7 @@ let strindex _ = function
 let string_to_list _ = function
    | [Env.Val_string s] -> String.to_list s
                         |> List.map ~f:(fun c -> Env.Val_char c)
-                        |> cons_of_list
+                        |> Env.cons_of_list
    | [v] -> raise (Type_Error ("String", Env.type_of_value v))
    | l -> raise (Invalid_Args ("string->list", 1, List.length l))
 
@@ -203,32 +192,17 @@ let list_to_string _ =
       | v :: _ -> raise (Type_Error ("Char", Env.type_of_value v)) in
    function 
       | [l] -> l
-            |> list_of_cons
+            |> Env.list_of_cons
             |> aux []
             |> String.of_char_list
             |> fun x -> Env.Val_string x
       | l -> raise (Invalid_Args ("list->string", 1, List.length l))
 
-let rec sexpr_of_cons c =
-   let lst = list_of_cons c in
-   let rec to_sexpr = function
-   | Env.Val_unit -> Sexpr.Atom (Atom.Unit)
-   | Env.Val_bool b -> Sexpr.Atom (Atom.Bool b)
-   | Env.Val_int i -> Sexpr.Atom (Atom.Int (Result.Ok i))
-   | Env.Val_float f -> Sexpr.Atom (Atom.Float f)
-   | Env.Val_char c -> Sexpr.Atom (Atom.Char (Result.Ok c))
-   | Env.Val_string s -> Sexpr.Atom (Atom.String s)
-   | Env.Val_id i -> Sexpr.Atom (Atom.ID i)
-   | Env.Val_cons _ as c -> let lst2 = list_of_cons c in
-                              Sexpr.List (List.map ~f:to_sexpr lst2)
-   | Env.Val_nil -> Sexpr.List [] in
-   Sexpr.List (List.map ~f:to_sexpr lst)
-
 (* Evaluate a list or quoted expression. *)
 let eval env = function
    | [l] ->
       let result = l
-                |> sexpr_of_cons
+                |> Env.sexpr_of_cons
                 |> Ast.ast_of_sexpr
                 |> fun a -> Env.eval a env in
       begin

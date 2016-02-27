@@ -35,6 +35,7 @@ type value =
    | Val_id     of string
    | Val_cons   of value * value
    | Val_nil
+   | Val_macro  of (t -> value list -> Check_ast.t)
    | Val_lambda of (t -> value list -> value)
 
 and t = value String.Table.t list
@@ -56,6 +57,7 @@ let rec string_of_value =
    | Val_string s      -> "\"" ^ s ^ "\""
    | Val_id s           -> s
    | (Val_cons _) as c -> "(" ^ (aux_cons c)
+   | Val_macro _       -> "macro"
    | Val_lambda _      -> "lambda expression"
 
 let type_of_value = function
@@ -68,6 +70,7 @@ let type_of_value = function
    | Val_id _       -> "Identifier"
    | Val_cons _     -> "List"
    | Val_lambda _   -> "Lambda"
+   | Val_macro _    -> "Macro"
    | Val_nil        -> "Nil"
 
 (* 
@@ -105,6 +108,27 @@ let add_all env names values =
 
 let cons_of_list = List.fold_right ~init:Val_nil
                                    ~f:(fun x y -> Val_cons (x, y))
+
+let rec list_of_cons = function
+   | Val_cons (x1, x2) -> x1 :: (list_of_cons x2)
+   | Val_nil           -> []
+   | other             -> raise (Type_Error ("List",
+                                             type_of_value other))
+
+let rec sexpr_of_cons c =
+   let lst = list_of_cons c in
+   let rec to_sexpr = function
+   | Val_unit -> Sexpr.Atom (Atom.Unit)
+   | Val_bool b -> Sexpr.Atom (Atom.Bool b)
+   | Val_int i -> Sexpr.Atom (Atom.Int (Result.Ok i))
+   | Val_float f -> Sexpr.Atom (Atom.Float f)
+   | Val_char c -> Sexpr.Atom (Atom.Char (Result.Ok c))
+   | Val_string s -> Sexpr.Atom (Atom.String s)
+   | Val_id i -> Sexpr.Atom (Atom.ID i)
+   | Val_cons _ as c -> let lst2 = list_of_cons c in
+                            Sexpr.List (List.map ~f:to_sexpr lst2)
+   | Val_nil -> Sexpr.List [] in
+   Sexpr.List (List.map ~f:to_sexpr lst)
 
 let rec quote_to_list =
    let eval_atom = function
@@ -150,14 +174,31 @@ let rec eval_checked ast env =
             | x -> raise (Type_Error ("ID",
                                       type_of_value x))
          end
+      | Check_ast.Macro  m -> Val_macro (function_of_macro m env)
       | Check_ast.Lambda l -> Val_lambda (function_of_lambda l env)
       | Check_ast.Apply (f, args) ->
-         (* Evaluate all the arguments. *)
-         let operands = List.map ~f:(fun x -> eval_checked x env) args in
          begin
             (* Evaluate the function. *)
             match eval_checked f env with
-               | Val_lambda f -> f env operands
+               | Val_lambda f ->
+                     (* If it's a lambda, evaluate all of the operands. *)
+                     let base_asts = List.map ~f:Ast.ast_of_sexpr args in
+                     let checked_asts = List.map ~f:Check_ast.check base_asts in
+                     let asts = List.rev @@ List.fold checked_asts
+                                           ~f:(fun lst -> function
+                                                          | Ok ast -> ast :: lst
+                                                          | Error (e :: _) ->
+                                                                Errors.throw e)
+                                           ~init:[] in
+                     let operands = List.map ~f:(fun x -> eval_checked x env)
+                                             asts in
+                     f env operands
+               | Val_macro m ->
+                     let operands = List.map args
+                                             ~f:(fun x -> Check_ast.Quote x) in
+                     let conses = List.map ~f:(fun x -> eval_checked x env)
+                                           operands in
+                     eval_checked (m env conses) env
                | x -> raise (Syntax_Error ("Value "
                                          ^ (string_of_value x)
                                          ^ " is not a function; "
@@ -186,6 +227,17 @@ and function_of_lambda {Check_ast.args; var_arg; code} env =
                         add closure args arg_list;
       end;
       eval_lambda closure code
+and function_of_macro lambda env =
+   let as_lambda = function_of_lambda lambda env in
+   fun env arguments ->
+      let result = as_lambda env arguments in
+      let checked = result
+                 |> sexpr_of_cons
+                 |> Ast.ast_of_sexpr
+                 |> Check_ast.check in
+      match checked with
+      | Ok ast  -> ast
+      | Error (e :: _) -> throw e
 
 
 let eval ast env =

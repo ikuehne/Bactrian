@@ -40,6 +40,7 @@ type value =
    | Val_id      of string
    | Val_cons    of value * value
    | Val_nil
+   | Val_macro  of (t -> value list -> Check_ast.t)
    | Val_lambda of (t -> value list -> value)
 
 (** Type of environments. *)
@@ -68,3 +69,12 @@ val add_all : t -> string list -> value list -> unit
 (** Take an AST, an environment in which to evaluate it, and produce either a
     value or a list of errors. *)
 val eval : Ast.t -> t -> (value, Errors.t list) Result.t
+
+(** Take an OCaml list and turn it into a Bactrian list. *)
+val cons_of_list : value list -> value
+
+(** Take a Bactrian list and turn it into an OCaml list. *)
+val list_of_cons : value -> value list
+
+(** Take a Bactrian list (i.e., a quoted piec of code) and return a Sexpr.t. *)
+val sexpr_of_cons : value -> Sexpr.t
