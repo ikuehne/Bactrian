@@ -38,7 +38,7 @@ module T = struct
        | If     of t * t * t
        | Macro  of (lambda, Errors.t) Result.t
        | Lambda of (lambda, Errors.t) Result.t
-       | Apply  of (t * t list, Errors.t) Result.t
+       | Apply  of (t * Sexpr.t list, Errors.t) Result.t
        | Quote  of S.t
     and lambda = { args:    string list;
                    var_arg: string option;
@@ -122,7 +122,7 @@ and ast_of_macro x =
 and ast_of_apply = function
    | f :: args -> begin
                      match check_f f with
-                     | Ok    f -> Apply (Ok (f, (List.map ~f:ast_of_sexpr args)))
+                     | Ok    f -> Apply (Ok (f, args))
                      | Error e -> Apply (Error e)
                   end
    | []        -> assert false

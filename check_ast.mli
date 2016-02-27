@@ -38,7 +38,7 @@ type t =
    | If     of t * t * t
    | Macro  of lambda
    | Lambda of lambda
-   | Apply  of t * t list
+   | Apply  of t * Sexpr.t list
    | Quote  of Sexpr.t
 and lambda = { args:    string list;
                var_arg: string option;

@@ -35,7 +35,7 @@ type t =
    | If     of t * t * t
    | Macro  of lambda
    | Lambda of lambda
-   | Apply  of t * t list
+   | Apply  of t * Sexpr.t list
    | Quote  of Sexpr.t
 and lambda = { args:    string list;
                var_arg: string option;
@@ -99,11 +99,9 @@ let rec check = function
            | (Error _) as x -> x
         end
    | Ast.Lambda (Error e) -> Error [e]
-   | Ast.Apply (Ok (ast, asts)) ->
-         let checked = List.map ~f:check (ast :: asts) in
-         begin match propagate checked with
-            | Ok (ast :: asts) ->
-                  Ok (Apply (ast, asts))
+   | Ast.Apply (Ok (ast, args)) ->
+         begin match check ast with
+            | Ok ast -> Ok (Apply (ast, args))
             | (Error _) as x -> x
             | _ -> assert false
          end
