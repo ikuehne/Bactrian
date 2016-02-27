@@ -27,25 +27,27 @@ module T = struct
    type t = token
 
    let sexp_of_t = function
-      | TOK_LPAREN -> Sexp.Atom "TOK_LPAREN"
-      | TOK_RPAREN -> Sexp.Atom "TOK_RPAREN"
-      | TOK_UNIT   -> Sexp.Atom "TOK_UNIT"
-      | TOK_EOF    -> Sexp.Atom "TOK_EOF"
-      | TOK_BOOL b -> Sexp.List [Sexp.Atom "TOK_BOOL"; Bool.sexp_of_t b]
-      | TOK_ID   s -> Sexp.List [Sexp.Atom "TOK_ID";   String.sexp_of_t s]
-      | TOK_FLOAT f -> Sexp.List [Sexp.Atom "TOK_FLOAT";
+      | TOK_LPAREN    -> Sexp.Atom "TOK_LPAREN"
+      | TOK_RPAREN    -> Sexp.Atom "TOK_RPAREN"
+      | TOK_UNIT      -> Sexp.Atom "TOK_UNIT"
+      | TOK_EOF       -> Sexp.Atom "TOK_EOF"
+      | TOK_BOOL b    -> Sexp.List [Sexp.Atom "TOK_BOOL"; Bool.sexp_of_t b]
+      | TOK_ID   s    -> Sexp.List [Sexp.Atom "TOK_ID";   String.sexp_of_t s]
+      | TOK_FLOAT f   -> Sexp.List [Sexp.Atom "TOK_FLOAT";
                                   Float.sexp_of_t f]
       | TOK_STRING s -> Sexp.List [Sexp.Atom "TOK_STRING";
                                    Sexp.Atom s ]
-      | TOK_INT  r -> Sexp.List [Sexp.Atom "TOK_INT";
+      | TOK_INT  r   -> Sexp.List [Sexp.Atom "TOK_INT";
                                  Result.sexp_of_t Int.sexp_of_t
                                                   Errors.sexp_of_t
                                                   r]
-      | TOK_CHAR r -> Sexp.List [Sexp.Atom "TOK_CHAR";
-                                 Result.sexp_of_t Char.sexp_of_t
-                                                  Errors.sexp_of_t
-                                                  r]
-      | TOK_QUOTE -> Sexp.Atom "TOK_QUOTE"
+      | TOK_CHAR r   -> Sexp.List [Sexp.Atom "TOK_CHAR";
+                                   Result.sexp_of_t Char.sexp_of_t
+                                                    Errors.sexp_of_t
+                                                    r]
+      | TOK_QUOTE   -> Sexp.Atom "TOK_QUOTE"
+      | TOK_QUASI   -> Sexp.Atom "TOK_QUASI"
+      | TOK_UNQUOTE -> Sexp.Atom "TOK_UNQUOTE"
 
    let t_of_sexp = function
       | Sexp.Atom "TOK_LPAREN" -> TOK_LPAREN
@@ -65,6 +67,8 @@ module T = struct
                                        Errors.t_of_sexp
                                        r)
       | Sexp.Atom "TOK_QUOTE" -> TOK_QUOTE
+      | Sexp.Atom "TOK_QUASI" -> TOK_QUASI
+      | Sexp.Atom "TOK_UNQUOTE" -> TOK_UNQUOTE
       | other -> Sexplib.Conv.of_sexp_error "unexpected sexp" other
 
 end

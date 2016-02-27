@@ -44,7 +44,8 @@
 let comment    = ';' [^'\n']*
 let whitespace = [' ' '\t' '\n']
 let integer    = '-'? ['0' - '9']+
-let id_char    = [^ '0' - '9' '(' ')' ';' '''] # whitespace
+(* Any character that can be at the start of an ID. *)
+let id_char    = [^ '0' - '9' '(' ')' ';' ''' ',' '`'] # whitespace
 let id         = id_char (id_char | ['0' - '9' '''])*
 let lit_char   = (_ # (whitespace)) [^ ' ' '\t' '\n' '(' ')']*
 let lit_string = ([^'"'] | '\\' '"')*
@@ -65,6 +66,8 @@ rule lex = parse
   | '"'(lit_string as s)'"'   { TOK_STRING s                         }
   | id as identifier          { TOK_ID identifier                    }
   | '''                       { TOK_QUOTE                            }
+  | '`'                       { TOK_QUASI                            }
+  | ','                       { TOK_UNQUOTE                          }
   | eof                       { TOK_EOF                              }
   (* lexer error -- this should never happen *)
   | _ { raise (Failure ("Unrecognized token: " ^ (Lexing.lexeme lexbuf))) } 

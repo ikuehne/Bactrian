@@ -29,7 +29,7 @@
   
 /* declarations */
 
-%token          TOK_LPAREN TOK_RPAREN TOK_QUOTE
+%token          TOK_LPAREN TOK_RPAREN TOK_QUOTE TOK_QUASI TOK_UNQUOTE
 %token          TOK_UNIT
 %token <bool>   TOK_BOOL
 %token <string> TOK_ID
@@ -37,7 +37,7 @@
 %token <(int, Errors.t)  Core.Std.Result.t> TOK_INT
 %token <(char, Errors.t) Core.Std.Result.t> TOK_CHAR
 %token <string> TOK_STRING
-%token <float> TOK_FLOAT
+%token <float>  TOK_FLOAT
 
 %start parse
 %type <Sexpr.t option> parse
@@ -55,6 +55,16 @@
 parse:
   | sexpr        { if $1 = (Sexpr.List []) then None else Some $1 }
 
+/* Parsing rule for quasiquoted S-Expressions. An S-Expression preceded by a
+ * backtick. */
+quasi_sexpr:
+   | TOK_QUASI sexpr { Sexpr.Quote $2 }
+
+/* Parsing rule for unquoted S-Expressions. An S-Expression preceded by a comma.
+ */
+unquoted_sexpr:
+   | TOK_UNQUOTE sexpr { $2 }
+
 /* Parsing rule for quoted S-Expressions. An S-Expression preceded by a quote.
 */
 quoted_sexpr:
@@ -63,9 +73,11 @@ quoted_sexpr:
 /* Parsing rule for s-expressions. Either an atom or a list of s-expressions.
  */
 sexpr:
-  | atom         { Sexpr.Atom $1 }
-  | slist        { Sexpr.List $1 }
-  | quoted_sexpr { $1 }
+  | atom           { Sexpr.Atom $1 }
+  | slist          { Sexpr.List $1 }
+  | quoted_sexpr   { $1 }
+  | unquoted_sexpr { $1 }
+  | quasi_sexpr    { $1}
 
 /* Match atoms and package them in an Atom.t. */
 atom:  
@@ -73,7 +85,7 @@ atom:
   | TOK_BOOL   { Atom.Bool $1   }
   | TOK_INT    { Atom.Int  $1   }
   | TOK_STRING { Atom.String $1 }
-  | TOK_FLOAT  { Atom.Float  $1 }       
+  | TOK_FLOAT  { Atom.Float  $1 }
   | TOK_CHAR   { Atom.Char $1   }
   | TOK_ID     { Atom.ID   $1   }
 
