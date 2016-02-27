@@ -115,9 +115,7 @@ let rec list_of_cons = function
    | other             -> raise (Type_Error ("List",
                                              type_of_value other))
 
-let rec sexpr_of_cons c =
-   let lst = list_of_cons c in
-   let rec to_sexpr = function
+let rec to_sexpr = function
    | Val_unit -> Sexpr.Atom (Atom.Unit)
    | Val_bool b -> Sexpr.Atom (Atom.Bool b)
    | Val_int i -> Sexpr.Atom (Atom.Int (Result.Ok i))
@@ -127,7 +125,10 @@ let rec sexpr_of_cons c =
    | Val_id i -> Sexpr.Atom (Atom.ID i)
    | Val_cons _ as c -> let lst2 = list_of_cons c in
                             Sexpr.List (List.map ~f:to_sexpr lst2)
-   | Val_nil -> Sexpr.List [] in
+   | Val_nil -> Sexpr.List []
+
+let rec sexpr_of_cons c =
+   let lst = list_of_cons c in
    Sexpr.List (List.map ~f:to_sexpr lst)
 
 let rec quote_to_list =
@@ -232,7 +233,7 @@ and function_of_macro lambda env =
    fun env arguments ->
       let result = as_lambda env arguments in
       let checked = result
-                 |> sexpr_of_cons
+                 |> to_sexpr
                  |> Ast.ast_of_sexpr
                  |> Check_ast.check in
       match checked with
