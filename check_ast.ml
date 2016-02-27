@@ -25,18 +25,20 @@ open Result.Monad_infix
 (* Type of AST expressions without errors. *)
 type t =
    | Unit
-   | Bool   of bool
-   | Int    of int
-   | Float  of float
-   | Char   of char
-   | String of string
-   | ID     of string
-   | Define of string * t
-   | If     of t * t * t
-   | Macro  of lambda
-   | Lambda of lambda
-   | Apply  of t * Sexpr.t list
-   | Quote  of Sexpr.t
+   | Bool     of bool
+   | Int      of int
+   | Float    of float
+   | Char     of char
+   | String   of string
+   | ID       of string
+   | Define   of string * t
+   | If       of t * t * t
+   | Macro    of lambda
+   | Lambda   of lambda
+   | Apply    of t * Sexpr.t list
+   | Quote    of Sexpr.t
+   | Quasi    of Sexpr.t
+   | Unquote  of Sexpr.t
 and lambda = { args:    string list;
                var_arg: string option;
                code:    t list }
@@ -106,4 +108,6 @@ let rec check = function
             | _ -> assert false
          end
    | Ast.Apply (Error e) -> Error [e]
-   | Ast.Quote s -> Ok (Quote s)
+   | Ast.Quote   s -> Ok (Quote s)
+   | Ast.Quasi   s -> Ok (Quasi s)
+   | Ast.Unquote s -> Ok (Unquote s)

@@ -40,6 +40,8 @@ type t =
    | Lambda of lambda
    | Apply  of t * Sexpr.t list
    | Quote  of Sexpr.t
+   | Quasi    of Sexpr.t
+   | Unquote  of Sexpr.t
 and lambda = { args:    string list;
                var_arg: string option;
                code:    t list }
