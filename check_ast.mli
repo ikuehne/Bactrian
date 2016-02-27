@@ -36,6 +36,7 @@ type t =
    | ID     of string
    | Define of string * t
    | If     of t * t * t
+   | Macro  of lambda
    | Lambda of lambda
    | Apply  of t * t list
    | Quote  of Sexpr.t

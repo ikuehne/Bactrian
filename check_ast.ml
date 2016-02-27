@@ -33,6 +33,7 @@ type t =
    | ID     of string
    | Define of string * t
    | If     of t * t * t
+   | Macro  of lambda
    | Lambda of lambda
    | Apply  of t * t list
    | Quote  of Sexpr.t
@@ -80,6 +81,15 @@ let rec check = function
             | (Error _) as x -> x
             | _ -> assert false
          end
+   | Ast.Macro (Ok m) ->
+        let checked = List.map ~f:check m.code in
+        begin
+           match propagate checked with
+           | Ok code ->
+                 Ok (Lambda {args=m.args; var_arg=m.var_arg; code})
+           | (Error _) as x -> x
+        end
+   | Ast.Macro (Error e) -> Error [e]
    | Ast.Lambda (Ok l) ->
         let checked = List.map ~f:check l.code in
         begin
