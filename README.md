@@ -10,6 +10,10 @@ Bactrian is an interpreter for a simple Scheme-like language.  The language and
 implementation are changing rapidly and primarily intended as an instructive
 project, so the language will mostly go undocumented for the moment.
 
+The `macros` branch in particular adds some (so far) experimental support for
+macros.  Macros are already supported, but the implementation is still in flux
+and is not ready for use, so I will not introduce the macro system here.
+
 Usage
 -----
 
